@@ -1,0 +1,108 @@
+======================================================================
+  PRODIGYMIND DEMO SCRIPT — TELEPROMPTER & PRESENTER GUIDE
+======================================================================
+Tone: Natural, enthusiastic kid presenter (smart, friendly, confident)
+Pacing: Energetic with natural pauses (...)
+Stage Directions: Marked in [ACTION: ...] brackets — do the action as you speak!
+
+======================================================================
+
+[ACTION: Start on the Home Screen. Look at the camera and smile.]
+
+Hey everyone! Welcome to ProdigyMind — the ultimate learning app where you can master literally everything from Kindergarten to 5th grade... and collect awesome animals while doing it!
+
+
+[ACTION: Tap the Subject Banner at the top of the screen.]
+
+So, first off... check out the banner at the top. When you tap right here, you can pick whatever subject you want to practice. 
+
+We’ve got over 34 different subjects! Everything from US State Capitals, to Kindergarten Math, 4th Grade Reading, Science, Social Studies... and even Spanish and French! 
+
+Like... let’s pick 4th Grade Math for now.
+
+
+[ACTION: Select "4th Grade Math" and tap "Close".]
+
+Nice! Now we’re back on our main dashboard. Notice how my coins, stars, and streak are saved right up top.
+
+Well, let’s check out how learning actually works. We have three super cool modes: Learn, Quiz, and Test.
+
+
+[ACTION: Tap the "Learn" button.]
+
+First up is Learn Mode. This opens up interactive flashcards for studying.
+
+
+[ACTION: Tap the flashcard to flip it over.]
+
+Boom! You just tap the card to flip it over and check the answer. It’s super chill for reviewing facts before a test.
+
+
+[ACTION: Tap "← Back" to return home, then tap "Quiz".]
+
+Next up... Quiz Mode! This is where the real fun starts. 
+
+
+[ACTION: Select a topic group and tap "Start Quiz".]
+
+So in Quiz Mode, you get multiple-choice questions. Watch what happens when I get one right...
+
+
+[ACTION: Tap the correct answer choice.]
+
+Boom! Correct sound effect, +10 coins, and your streak goes up! But... if you miss one...
+
+
+[ACTION: Tap an incorrect answer choice.]
+
+Oof! It gives you instant feedback and shows you the right answer so you actually learn from it.
+
+
+[ACTION: Finish the short quiz and view the Results Screen.]
+
+When you finish a quiz, you get a full breakdown of your score, stars earned, and coins collected!
+
+
+[ACTION: Tap "← Back to Home", then scroll down to the Shop section.]
+
+Now for my absolute favorite part... what do you actually DO with all those coins you earn?
+
+You spend them in the Animal Shop! You can buy Mystery Animal Packs... there are Common packs, Forest packs, Ocean packs, and even Legendary packs!
+
+
+[ACTION: Tap "Buy Pack" on the Forest Pack.]
+
+Let's buy a Forest Pack. Watch this animation...
+
+
+[ACTION: Tap the parcel box on screen to reveal the animal.]
+
+YES! We unlocked a Rare Owl! 🦉 Listen to that reveal sound effect!
+
+
+[ACTION: Tap "Done", then tap the "Collection" button to open the Zoo.]
+
+All the animals you unlock go straight into your Collection Zoo. You can view your collection by Pack or by Rarity... like, look at all these Legendaries! 
+
+And check this out... you can set any unlocked animal as your own personal profile avatar!
+
+
+[ACTION: Tap your profile avatar at the top right to open the Account Page.]
+
+And don't worry about losing your animals or stars... ProdigyMind has full Cloud Sync with Google! You just tap Sign In, link your account, and all your progress stays synced across your phone, tablet, or computer.
+
+
+[ACTION: Tap "Settings" (gear icon).]
+
+Finally, in Settings, you can switch between Light and Dark mode, toggle sound effects, or change how answer buttons look.
+
+
+[ACTION: Tap "Done" to return to Home, look back at the camera.]
+
+And... that’s ProdigyMind! It makes studying actually fun and super rewarding. 
+
+Thanks for watching, and go get those stars!
+
+======================================================================
+  END OF SCRIPT
+======================================================================
