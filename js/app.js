@@ -13,6 +13,7 @@
   const hasGSAP = typeof gsap !== "undefined";
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+  const on = (sel, evt, fn) => { const el = typeof sel === "string" ? $(sel) : sel; if (el) el.addEventListener(evt, fn); };
 
   // Small safe wrappers so the app never crashes if GSAP is missing.
   function animIn(el, opts) {
@@ -589,7 +590,7 @@
 
     const sell = $("#sellAnimal");
     if (sell) sell.addEventListener("click", () => sellAnimal(a, rar, pack, clampQty()));
-    $("#closeAnimal").addEventListener("click", () => closeOverlay("#animalOverlay"));
+    on("#closeAnimal", "click", () => closeOverlay("#animalOverlay"));
   }
 
   function sellAnimal(a, rar, pack, qty) {
@@ -765,18 +766,18 @@
     }
   }
 
-  $("#pickAll").addEventListener("click", function () {
+  on("#pickAll", "click", function () {
     getActiveItems().forEach(function (item) { selected.add(item.id); });
     syncChips();
     updatePickCount();
   });
-  $("#pickNone").addEventListener("click", () => {
+  on("#pickNone", "click", () => {
     selected.clear();
     syncChips();
     updatePickCount();
   });
 
-  $("#startFromPicker").addEventListener("click", () => {
+  on("#startFromPicker", "click", () => {
     if (selected.size === 0) {
       toast(activeSubject === "capitals" ? "Pick at least one state first! 👆" : "Pick at least one topic first! 👆");
       return;
@@ -872,10 +873,10 @@
     }
   }
 
-  $("#flashCard").addEventListener("click", flipCard);
-  $("#flashCard").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") flipCard(); });
+  on("#flashCard", "click", flipCard);
+  on("#flashCard", "keydown", (e) => { if (e.key === "Enter" || e.key === " ") flipCard(); });
 
-  $("#learnNext").addEventListener("click", () => {
+  on("#learnNext", "click", () => {
     if (learnIdx < learnList.length - 1) {
       learnIdx++;
       renderCard();
@@ -884,10 +885,10 @@
       finishLearn();
     }
   });
-  $("#learnPrev").addEventListener("click", () => {
+  on("#learnPrev", "click", () => {
     if (learnIdx > 0) { learnIdx--; renderCard(); }
   });
-  $("#exitLearn").addEventListener("click", function () { confirmExit(function () {
+  on("#exitLearn", "click", function () { confirmExit(function () {
     logActivity("lesson", { states: learnList.slice(), exited: true });
     show("home"); renderHome();
   }); });
@@ -910,12 +911,12 @@
       '<button class="btn btn-accent btn-lg" id="reviewNow">Start review 🎯</button> ' +
       '<button class="btn btn-lg" id="reviewLater">Maybe later</button>';
     animIn(wrap);
-    $("#reviewNow").addEventListener("click", () => {
+    on("#reviewNow", "click", () => {
       // Reuse the states we just learned as the quiz set.
       quizMode = "classic";
       startQuiz(Array.from(selected));
     });
-    $("#reviewLater").addEventListener("click", () => { show("home"); renderHome(); });
+    on("#reviewLater", "click", () => { show("home"); renderHome(); });
   }
 
   // ============================================================
@@ -1192,7 +1193,7 @@
       const fake = document.createElement("div");
       handleAnswer(fake, ok, answer, input);
     };
-    $("#typeSubmit").addEventListener("click", submit);
+    on("#typeSubmit", "click", submit);
     input.addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
   }
 
@@ -1261,7 +1262,7 @@
     }
   }
 
-  $("#exitQuiz").addEventListener("click", () => {
+  on("#exitQuiz", "click", () => {
     gameConfirm({
       emoji: "⏸️",
       title: "Leave this quiz?",
@@ -1343,8 +1344,8 @@
       show("home"); renderHome();
       $("#shopPanel").scrollIntoView({ behavior: "smooth" });
     });
-    $("#playAgain").addEventListener("click", () => startQuiz(quizAbbrs));
-    $("#backHome").addEventListener("click", () => { show("home"); renderHome(); });
+    on("#playAgain", "click", () => startQuiz(quizAbbrs));
+    on("#backHome", "click", () => { show("home"); renderHome(); });
   }
 
   // ---- Buying + opening packs -------------------------------
@@ -1414,12 +1415,12 @@
       if (isTop) launchConfetti();
 
       $("#packAgain").disabled = save.coins < pack.cost;
-      $("#packAgain").addEventListener("click", () => {
+      on("#packAgain", "click", () => {
         if (save.coins < pack.cost) { toast("Not enough coins! 🪙"); return; }
         closeOverlay("#packOverlay");
         buyPack(pack);
       });
-      $("#packDone").addEventListener("click", () => {
+      on("#packDone", "click", () => {
         closeOverlay("#packOverlay");
         renderHome();
       });
@@ -1485,28 +1486,27 @@
   }
 
   // Collapse/expand the Time-on-Task history (remembered across visits).
-  $("#historyToggle").addEventListener("click", () => {
+  on("#historyToggle", "click", () => {
     save.historyOpen = !save.historyOpen;
     persist(save);
     applyHistoryState();
   });
 
-  $("#shopToggle").addEventListener("click", () => {
+  on("#shopToggle", "click", () => {
     save.shopOpen = save.shopOpen === false ? true : false;
     persist(save);
     applyShopState();
   });
 
-  $("#collectionToggle").addEventListener("click", () => {
+  on("#collectionToggle", "click", () => {
     save.collectionOpen = save.collectionOpen === false ? true : false;
     persist(save);
     applyCollectionState();
   });
 
-  $("#settingsBtn").addEventListener("click", () => show("settings"));
-  $("#closeSettings").addEventListener("click", () => { show("home"); renderHome(); });
-  $("#closeProfile").addEventListener("click", () => closeOverlay("#profileOverlay"));
-  $("#profileSignOutBtn").addEventListener("click", async () => {
+  on("#settingsBtn", "click", () => show("settings"));
+  on("#closeSettings", "click", () => { show("home"); renderHome(); });
+    on("#profileSignOutBtn", "click", async () => {
     if (!window.FirebaseService) return;
     try {
       await window.FirebaseService.signOutUser();
@@ -1516,8 +1516,8 @@
       toast("Sign-out error");
     }
   });
-  $("#helpBtn").addEventListener("click", () => openOverlay("#helpOverlay"));
-  $("#closeHelp").addEventListener("click", () => closeOverlay("#helpOverlay"));
+  on("#helpBtn", "click", () => openOverlay("#helpOverlay"));
+  on("#closeHelp", "click", () => closeOverlay("#helpOverlay"));
 
   $$("#themeSeg button").forEach((b) => {
     b.addEventListener("click", () => { applyTheme(b.dataset.theme); persist(save); });
@@ -1534,11 +1534,11 @@
       if (save.sound) playSFX("correct");
     });
   }
-  $("#replayTutorial").addEventListener("click", () => {
+  on("#replayTutorial", "click", () => {
     show("home");
     startTutorial();
   });
-  $("#resetProgress").addEventListener("click", () => {
+  on("#resetProgress", "click", () => {
     gameConfirm({
       emoji: "⚠️",
       title: "Reset everything?",
@@ -1690,11 +1690,11 @@
       gsap.fromTo(arrow, { y: dir }, { y: -dir, duration: 0.6, repeat: -1, yoyo: true, ease: "sine.inOut" });
     }
 
-    $("#tutNext").addEventListener("click", () => {
+    on("#tutNext", "click", () => {
       if (tutStep < TUTORIAL_STEPS.length - 1) { tutStep++; renderCoach(); }
       else endTutorial();
     });
-    $("#tutSkip").addEventListener("click", endTutorial);
+    on("#tutSkip", "click", endTutorial);
   }
 
   function endTutorial() {
@@ -2063,19 +2063,19 @@
   // ============================================================
   // BOOT
   // ============================================================
-  $("#goLearn").addEventListener("click", function () { openPicker("learn"); });
-  $("#goLearn").addEventListener("keydown", function (e) { if (e.key === "Enter") openPicker("learn"); });
-  $("#goQuiz").addEventListener("click", function () { openPicker("quiz"); });
-  $("#goQuiz").addEventListener("keydown", function (e) { if (e.key === "Enter") openPicker("quiz"); });
-  $("#goTest").addEventListener("click", function () { openPicker("test"); });
-  $("#goTest").addEventListener("keydown", function (e) { if (e.key === "Enter") openPicker("test"); });
+  on("#goLearn", "click", function () { openPicker("learn"); });
+  on("#goLearn", "keydown", function (e) { if (e.key === "Enter") openPicker("learn"); });
+  on("#goQuiz", "click", function () { openPicker("quiz"); });
+  on("#goQuiz", "keydown", function (e) { if (e.key === "Enter") openPicker("quiz"); });
+  on("#goTest", "click", function () { openPicker("test"); });
+  on("#goTest", "keydown", function (e) { if (e.key === "Enter") openPicker("test"); });
 
   const subjectBannerEl = $("#subjectBanner");
   if (subjectBannerEl) {
     subjectBannerEl.addEventListener("click", openSubjectPicker);
     subjectBannerEl.addEventListener("keydown", function (e) { if (e.key === "Enter") openSubjectPicker(); });
   }
-  $("#closeSubject").addEventListener("click", function () { closeOverlay("#subjectOverlay"); });
+  on("#closeSubject", "click", function () { closeOverlay("#subjectOverlay"); });
 
   function boot() {
     applyTheme(save.theme || "auto");
