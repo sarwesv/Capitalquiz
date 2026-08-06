@@ -2630,3 +2630,21 @@ function getSubjectGroups(subjectId) {
   return seen;
 }
 
+if (typeof window !== "undefined") {
+  window.STATES = STATES;
+  window.REGIONS = REGIONS;
+  window.REGION_EMOJI = REGION_EMOJI;
+  window.RARITIES = RARITIES;
+  window.RARITY_ORDER = RARITY_ORDER;
+  window.PACKS = PACKS;
+  window.ALL_ANIMALS = ALL_ANIMALS;
+  window.TOTAL_ANIMALS = TOTAL_ANIMALS;
+  window.MASTERY_THRESHOLDS = MASTERY_THRESHOLDS;
+  window.MASTERY_LABELS = MASTERY_LABELS;
+  window.MASTERY_EMOJI = MASTERY_EMOJI;
+  window.SUBJECTS = SUBJECTS;
+  window.getSubjectItems = getSubjectItems;
+  window.getSubjectGroups = getSubjectGroups;
+  window.rollFromPack = rollFromPack;
+}
+

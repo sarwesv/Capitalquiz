@@ -15,6 +15,23 @@
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
   const on = (sel, evt, fn) => { const el = typeof sel === "string" ? $(sel) : sel; if (el) el.addEventListener(evt, fn); };
 
+  // Safe global data aliases (prevent ReferenceError if window scope changes)
+  const STATES = window.STATES || [];
+  const REGIONS = window.REGIONS || [];
+  const REGION_EMOJI = window.REGION_EMOJI || {};
+  const RARITIES = window.RARITIES || {};
+  const RARITY_ORDER = window.RARITY_ORDER || [];
+  const PACKS = window.PACKS || [];
+  const ALL_ANIMALS = window.ALL_ANIMALS || {};
+  const TOTAL_ANIMALS = window.TOTAL_ANIMALS || 60;
+  const MASTERY_THRESHOLDS = window.MASTERY_THRESHOLDS || [0, 1, 3, 5, 8];
+  const MASTERY_LABELS = window.MASTERY_LABELS || [];
+  const MASTERY_EMOJI = window.MASTERY_EMOJI || [];
+  const SUBJECTS = window.SUBJECTS || [];
+  const getSubjectItems = window.getSubjectItems || function() { return []; };
+  const getSubjectGroups = window.getSubjectGroups || function() { return []; };
+  const rollFromPack = window.rollFromPack || function() { return null; };
+
   // Small safe wrappers so the app never crashes if GSAP is missing.
   function animIn(el, opts) {
     if (!hasGSAP || !el) return;
