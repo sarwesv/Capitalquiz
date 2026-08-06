@@ -24,6 +24,22 @@
     gsap.fromTo(el, { scale: 0.85 }, { scale: 1, duration: 0.45, ease: "back.out(2)" });
   }
 
+  // Audio SFX player (no SFX for button tap per user request)
+  const sfxCache = {};
+  function playSFX(name) {
+    if (save.sound === false) return;
+    try {
+      if (!sfxCache[name]) {
+        sfxCache[name] = new Audio("audio/" + name + ".mp3");
+      }
+      const audio = sfxCache[name];
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    } catch (e) {
+      // Audio playback blocked or unhandled
+    }
+  }
+
   // Which states the current lesson/quiz uses, and what mode we're in.
   let selected = new Set();     // set of abbreviations
   let pickerMode = "learn";     // "learn" or "quiz"
@@ -822,6 +838,7 @@
   }
 
   function flipCard() {
+    playSFX("card_flip");
     const id = learnList[learnIdx];
     const card = $("#flashCard");
     cardFlipped = !cardFlipped;
@@ -1196,6 +1213,11 @@
       quizScore++;
       streak++;
       p.correct++;
+      if (streak >= 3 && streak % 3 === 0) {
+        playSFX("streak");
+      } else {
+        playSFX("correct");
+      }
       if (activeSubject === "capitals") {
         // One-time coin rewards — replaying earns nothing here.
         claimMilestone(p, "correctRewarded", COIN_FIRST_RIGHT);
@@ -1209,6 +1231,7 @@
       cheer();
     } else {
       streak = 0;
+      playSFX("wrong");
       if (btn.classList) { btn.classList.remove("dim"); btn.classList.add("wrong"); }
       if (typeInput) typeInput.classList.add("wrong");
       // Highlight the correct answer for learning.
@@ -1257,6 +1280,7 @@
   // RESULTS + REWARDS  (the "rewarding" part!)
   // ============================================================
   function finishQuiz() {
+    playSFX("completed");
     $("#quizBar").style.width = "100%";
     // A finished quiz is no longer resumable — drop its paused entry.
     if (resumingId) { deletePausedQuiz(resumingId); resumingId = null; }
@@ -1327,6 +1351,7 @@
   function buyPack(pack) {
     if (save.coins < pack.cost) { toast("Not enough coins yet — do a lesson or quiz! 🪙"); return; }
     save.coins -= pack.cost;
+    playSFX("pack_bought");
     const animal = rollFromPack(pack);
     const newCount = addAnimal(save, animal.id);
     persist(save);
@@ -1357,6 +1382,13 @@
       if (hasGSAP) gsap.killTweensOf(parcel);
 
       const isTop = animal.rarity === "epic" || animal.rarity === "legendary";
+      playSFX("pack_open");
+      setTimeout(() => {
+        if (isTop) playSFX("reveal_epic");
+        else if (animal.rarity === "rare") playSFX("reveal_rare");
+        else playSFX("reveal_common");
+      }, 250);
+
       box.innerHTML =
         '<div class="pack-title">' + pack.emoji + " " + pack.name + "</div>" +
         '<div class="reveal-card neo" style="--glow:' + rar.color + '">' +
@@ -1493,6 +1525,15 @@
   $$("#layoutSeg button").forEach((b) => {
     b.addEventListener("click", () => { applyAnswerLayout(b.dataset.layout); persist(save); });
   });
+  const soundToggle = $("#soundToggle");
+  if (soundToggle) {
+    soundToggle.checked = save.sound !== false;
+    soundToggle.addEventListener("change", () => {
+      save.sound = soundToggle.checked;
+      persist(save);
+      if (save.sound) playSFX("correct");
+    });
+  }
   $("#replayTutorial").addEventListener("click", () => {
     show("home");
     startTutorial();

@@ -9,6 +9,7 @@ const LEGACY_STORAGE_KEY = "capitalsQuest.v1";
 // The shape of a brand-new save file.
 function defaultSave() {
   return {
+    sound: true,               // Sound effects enabled by default.
     tutorialDone: false,       // Have we shown the arrow tutorial yet?
     neomorphism: true,         // Soft "neomorphism" look on or off.
     // Per-state mastery. Each entry: { seen, correct, attempts, mastered }
