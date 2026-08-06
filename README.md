@@ -1,6 +1,6 @@
 # 🧠 ProdigyMind
 
-A fun, rewarding way for kids (built to be easy for a 5th grader) to learn — **US state capitals, 1st-grade math, Dolch sight words**, and more! Study with flash cards, play Blooket-style quiz games, earn coins, and open animal packs to collect a huge library of cute critters.
+A fun, rewarding way for kids to learn — **US state capitals, 1st-grade math, Dolch sight words**, and more! Study with flash cards, play Blooket-style quiz games, earn coins, and open animal packs to collect a huge library of cute critters.
 
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen?style=for-the-badge&logo=github)](https://sarwesv.github.io/Prodigymind/)
 
