@@ -268,38 +268,51 @@
         <button class="btn btn-primary btn-block" id="closeSettings">Done</button>
       </div>
     </main>
-  </div>
 
-  <!-- ===== Profile modal ===== -->
-  <div id="profileOverlay" class="overlay hidden">
-    <div class="modal neo">
-      <h2>👤 My Account</h2>
-      <div class="profile-info" id="profileInfo">
-        <div class="profile-avatar-wrap" id="profileAvatarWrap" role="button" tabindex="0" title="Change avatar">
-          <img id="profileAvatar" class="profile-avatar" src="" alt="Avatar" />
-          <span class="avatar-edit-hint">✏️</span>
+    <!-- ===== Account & Sign In screen ===== -->
+    <main id="screen-auth" class="screen hidden">
+      <button class="back-link" id="authBack">← Back to Home</button>
+      <div class="panel neo" style="max-width: 480px; margin: 10px auto; padding: 28px;">
+        <h2>👤 Account &amp; Cloud Sync</h2>
+        
+        <!-- Signed out view -->
+        <div id="authSignedOutView" class="center">
+          <div style="font-size: 3.8rem; margin: 16px 0 8px;">☁️</div>
+          <h3>Sync your progress</h3>
+          <p class="muted" style="margin-bottom: 24px;">Sign in with your Google account to save your stars, animal collection, and coins across all your devices.</p>
+          <button class="btn btn-primary btn-lg btn-block" id="pageGoogleSignInBtn">
+            <span>🔑 Sign in with Google</span>
+          </button>
         </div>
-        <div>
-          <div id="profileName" class="profile-name"></div>
-          <div id="profileEmail" class="profile-email muted"></div>
+
+        <!-- Signed in view -->
+        <div id="authSignedInView" class="hidden">
+          <div class="profile-info" id="profileInfo">
+            <div class="profile-avatar-wrap" id="profileAvatarWrap" role="button" tabindex="0" title="Change avatar">
+              <img id="profileAvatar" class="profile-avatar" src="" alt="Avatar" />
+              <span class="avatar-edit-hint">✏️</span>
+            </div>
+            <div>
+              <div id="profileName" class="profile-name"></div>
+              <div id="profileEmail" class="profile-email muted"></div>
+            </div>
+          </div>
+          <div id="avatarPicker" class="avatar-picker hidden">
+            <p class="muted" style="font-size:0.85rem; margin-bottom:8px;">Pick an unlocked animal — or use your Google photo.</p>
+            <div id="avatarOptions" class="avatar-options"></div>
+          </div>
+          <div class="setting-row">
+            <div>
+              <strong>Stay signed in</strong>
+              <div class="desc">Keep me logged in when I close the browser.</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="staySignedInToggle" /><span class="slider"></span></label>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn btn-block" id="profileSignOutBtn" style="color:var(--danger)">Sign Out</button>
         </div>
       </div>
-      <div id="avatarPicker" class="avatar-picker hidden">
-        <p class="muted" style="font-size:0.85rem; margin-bottom:8px;">Pick an unlocked animal — or use your Google photo.</p>
-        <div id="avatarOptions" class="avatar-options"></div>
-      </div>
-      <div class="setting-row">
-        <div>
-          <strong>Stay signed in</strong>
-          <div class="desc">Keep me logged in when I close the browser.</div>
-        </div>
-        <label class="switch"><input type="checkbox" id="staySignedInToggle" /><span class="slider"></span></label>
-      </div>
-      <div class="spacer"></div>
-      <button class="btn btn-block" id="profileSignOutBtn" style="color:var(--danger)">Sign Out</button>
-      <div class="spacer"></div>
-      <button class="btn btn-primary btn-block" id="closeProfile">Done</button>
-    </div>
+    </main>
   </div>
 
   <!-- ===== Help modal ===== -->

@@ -257,7 +257,7 @@
   }
 
   // ---- Screen navigation ------------------------------------
-  const screens = ["home", "picker", "learn", "qmode", "quiz", "results", "settings"];
+  const screens = ["home", "picker", "learn", "qmode", "quiz", "results", "settings", "auth"];
   function show(name) {
     screens.forEach((s) => $("#screen-" + s).classList.toggle("hidden", s !== name));
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1839,18 +1839,46 @@
         if (profilePill) profilePill.classList.remove("hidden");
 
         const avatar = $("#userAvatar");
-        if (avatar) avatar.src = user.photoURL || "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👤</text></svg>";
+        if (avatar) avatar.src = getProfileAvatarSrc(user);
         const userName = $("#userName");
         if (userName) userName.textContent = user.displayName ? user.displayName.split(" ")[0] : "Learner";
 
         if (authDesc) authDesc.textContent = "Signed in as " + (user.displayName || user.email || "Google User");
-        if (settingsAuthBtn) settingsAuthBtn.textContent = "Sign Out";
+        if (settingsAuthBtn) settingsAuthBtn.textContent = "Account";
       } else {
         if (signInBtn) signInBtn.classList.remove("hidden");
         if (profilePill) profilePill.classList.add("hidden");
 
         if (authDesc) authDesc.textContent = "Signed in as Guest. Sign in with Google to sync progress across devices.";
         if (settingsAuthBtn) settingsAuthBtn.textContent = "Sign In";
+      }
+      renderAuthPage(user);
+    }
+
+    function renderAuthPage(user) {
+      const u = user !== undefined ? user : (window.FirebaseService ? window.FirebaseService.getCurrentUser() : null);
+      const signedOutView = $("#authSignedOutView");
+      const signedInView = $("#authSignedInView");
+
+      if (u) {
+        if (signedOutView) signedOutView.classList.add("hidden");
+        if (signedInView) signedInView.classList.remove("hidden");
+
+        const nameEl = $("#profileName");
+        if (nameEl) nameEl.textContent = u.displayName || "Learner";
+        const emailEl = $("#profileEmail");
+        if (emailEl) emailEl.textContent = u.email || "";
+
+        refreshProfileAvatar();
+
+        const toggle = $("#staySignedInToggle");
+        if (toggle) toggle.checked = save.staySignedIn !== false;
+
+        const picker = $("#avatarPicker");
+        if (picker) picker.classList.add("hidden");
+      } else {
+        if (signedOutView) signedOutView.classList.remove("hidden");
+        if (signedInView) signedInView.classList.add("hidden");
       }
     }
 
@@ -1860,10 +1888,7 @@
         return;
       }
       try {
-        const user = await window.FirebaseService.signInWithGoogle();
-        if (user) {
-          toast("Signed in as " + (user.displayName || user.email) + " ☁️");
-        }
+        await window.FirebaseService.signInWithGoogle();
       } catch (err) {
         toast("Sign-in error: " + (err.message || err));
       }
@@ -1874,33 +1899,17 @@
       try {
         await window.FirebaseService.signOutUser();
         toast("Signed out. Operating in Guest mode 👤");
+        show("home");
+        renderHome();
       } catch (err) {
         toast("Sign-out error");
       }
     }
 
-    function openProfileModal() {
+    function openAuthPage() {
       const user = window.FirebaseService ? window.FirebaseService.getCurrentUser() : null;
-      if (!user) return;
-
-      // Populate header info
-      const nameEl = $("#profileName");
-      if (nameEl) nameEl.textContent = user.displayName || "Learner";
-      const emailEl = $("#profileEmail");
-      if (emailEl) emailEl.textContent = user.email || "";
-
-      // Avatar: use saved animal or Google photo
-      refreshProfileAvatar();
-
-      // Stay signed in toggle
-      const toggle = $("#staySignedInToggle");
-      if (toggle) toggle.checked = save.staySignedIn !== false;
-
-      // Reset avatar picker state
-      const picker = $("#avatarPicker");
-      if (picker) picker.classList.add("hidden");
-
-      openOverlay("#profileOverlay");
+      renderAuthPage(user);
+      show("auth");
     }
 
     function emojiDataUri(emoji) {
@@ -1923,10 +1932,8 @@
     function refreshProfileAvatar() {
       const user = window.FirebaseService ? window.FirebaseService.getCurrentUser() : null;
       const src = getProfileAvatarSrc(user);
-      // Update topbar pill
       const pillAvatar = $("#userAvatar");
       if (pillAvatar) pillAvatar.src = src;
-      // Update profile modal avatar
       const profAvatar = $("#profileAvatar");
       if (profAvatar) profAvatar.src = src;
     }
@@ -1952,7 +1959,6 @@
       if (!container) return;
       container.innerHTML = "";
 
-      // "Google photo" option first
       const user = window.FirebaseService ? window.FirebaseService.getCurrentUser() : null;
       const googleBtn = document.createElement("button");
       googleBtn.className = "avatar-option" + (!save.profileAvatar ? " selected" : "");
@@ -1969,7 +1975,6 @@
       });
       container.appendChild(googleBtn);
 
-      // Unlocked animals
       Object.entries(save.collection).forEach(([id, count]) => {
         if (!count) return;
         let animal = null;
@@ -2004,20 +2009,19 @@
       });
     }
 
+    // Page action bindings
+    const authBackBtn = $("#authBack");
+    if (authBackBtn) authBackBtn.addEventListener("click", () => { show("home"); renderHome(); });
 
+    const pageSignInBtn = $("#pageGoogleSignInBtn");
+    if (pageSignInBtn) pageSignInBtn.addEventListener("click", handleSignIn);
 
-    if (signInBtn) signInBtn.addEventListener("click", handleSignIn);
-    if (profilePill) profilePill.addEventListener("click", openProfileModal);
-    if (settingsAuthBtn) {
-      settingsAuthBtn.addEventListener("click", () => {
-        const currentUser = window.FirebaseService ? window.FirebaseService.getCurrentUser() : null;
-        if (currentUser) {
-          handleSignOut();
-        } else {
-          handleSignIn();
-        }
-      });
-    }
+    const pageSignOutBtn = $("#profileSignOutBtn");
+    if (pageSignOutBtn) pageSignOutBtn.addEventListener("click", handleSignOut);
+
+    if (signInBtn) signInBtn.addEventListener("click", openAuthPage);
+    if (profilePill) profilePill.addEventListener("click", openAuthPage);
+    if (settingsAuthBtn) settingsAuthBtn.addEventListener("click", openAuthPage);
 
     window.addEventListener("firebaseCloudSaveReceived", (e) => {
       if (e.detail && window.FirebaseService) {

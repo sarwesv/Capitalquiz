@@ -7,8 +7,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithPopup,
   signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
   setPersistence,
@@ -56,6 +56,14 @@ export function initFirebase(onAuthChanged, onSyncStatus) {
     auth = getAuth(app);
     db = getFirestore(app);
 
+    getRedirectResult(auth).then((result) => {
+      if (result && result.user) {
+        setSyncStatus("synced", "Signed in");
+      }
+    }).catch((err) => {
+      console.warn("Redirect result handler:", err);
+    });
+
     onAuthStateChanged(auth, (user) => {
       currentUser = user;
       if (typeof authChangedCallback === "function") {
@@ -86,24 +94,13 @@ export async function signInWithGoogle() {
   }
 
   const provider = new GoogleAuthProvider();
-  setSyncStatus("syncing", "Signing in...");
+  setSyncStatus("syncing", "Redirecting to Google...");
 
   try {
-    const result = await signInWithPopup(auth, provider);
-    return result.user;
+    await signInWithRedirect(auth, provider);
   } catch (error) {
-    if (error.code === "auth/popup-blocked" || error.code === "auth/popup-closed-by-user") {
-      console.warn("Popup blocked/closed. Attempting signInWithRedirect...");
-      try {
-        await signInWithRedirect(auth, provider);
-      } catch (redirectErr) {
-        setSyncStatus("error", redirectErr.message);
-        throw redirectErr;
-      }
-    } else {
-      setSyncStatus("error", error.message);
-      throw error;
-    }
+    setSyncStatus("error", error.message);
+    throw error;
   }
 }
 
