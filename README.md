@@ -16,7 +16,7 @@ A fun, rewarding way for kids (built to be easy for a 5th grader) to learn — *
 - **🗺️ Flexible Region Selection** — Choose specific states, whole regions (Northeast, South, Midwest, West, Pacific/Territories), or tap **Select All 50**.
 - **🚫 Anti-Grind Milestone Economy** — Coins are tied to one-time milestones (first correct answer, first state mastery). Replaying already-mastered content earns 0 coins to maintain fair progression.
 - **📈 Progress Tracking** — Quiz scores and performance data are stored locally and plotted on an interactive progress chart.
-- **🎨 Custom Styling & Neomorphism** — Toggle soft 3D neomorphic styling on/off in ⚙️ Settings.
+- **🎨 Material Design 3 System** — Styled with Google's Material Design 3 (Material You) design tokens, container surfaces, and elevation.
 - **🌗 Dark / Light Mode** — Automatic system theme detection with manual override options.
 - **👋 Guided Tutorial** — Interactive coach-marks guide first-time learners around the dashboard.
 - **📱 Fully Responsive & Offline Ready** — Built entirely with emoji graphics (no external image assets needed) and operates completely offline once loaded.
@@ -62,7 +62,7 @@ node --check js/app.js && node --check js/storage.js && node --check js/data.js
 ```
 ├── index.html      # Main HTML structure, screens, and modal overlays
 ├── css/
-│   └── styles.css  # CSS variables, neomorphism styles, layout, and animations
+│   └── styles.css  # MD3 design tokens, theme variables, layout, and animations
 └── js/
     ├── data.js     # Static datasets (50 states, regions, animal packs, rarities)
     ├── storage.js  # LocalStorage wrapper & default schema

@@ -36,7 +36,7 @@ The only external resources are CDN-loaded at runtime:
 ```
 index.html      All markup: screens (home, picker, learn, qmode, quiz, results)
                 and modals (settings, help, animal, pack, confirm, coachLayer).
-css/styles.css  Theme tokens, neomorphism, layout, component styles, animations.
+css/styles.css  MD3 design tokens, theme variables, layout, component styles, animations.
 js/data.js      Static data + pure helpers: STATES (50), REGIONS, RARITIES,
                 PACKS (animal library), and helpers like shuffle/rollFromPack.
 js/storage.js   Everything that touches localStorage. defaultSave() is the
@@ -88,8 +88,7 @@ by the same quiz flow but with its own question-rendering branch.
   `closeOverlay('#overlayId')`. Each modal is a hidden `div.overlay` in `index.html`.
 - **Everything is emoji** — animals, icons, regions. There are intentionally **no
   image files**, which keeps the app offline-capable and light.
-- **Theme + neomorphism** are driven by CSS variables and body/root classes
-  (`body.flat`, `:root[data-theme]`). Style both light and dark.
+- **Theme & MD3 Styling** are driven by CSS variables and root attributes (`:root[data-theme]`). Style both light and dark.
 - Match the existing plain-ES5-ish style (function declarations, `let`/`const`,
   string concatenation for templates). No new tooling.
 
