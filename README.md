@@ -1,70 +1,78 @@
 # 🧠 ProdigyMind
 
-A fun, rewarding way for kids (built to be easy for a 5th grader) to learn —
-**US state capitals, 1st-grade math, Dolch sight words**, and more. Study with
-flash cards, play quiz games, earn coins, and open animal packs to collect a huge
-library of cute critters!
+A fun, rewarding way for kids (built to be easy for a 5th grader) to learn — **US state capitals, 1st-grade math, Dolch sight words**, and more! Study with flash cards, play Blooket-style quiz games, earn coins, and open animal packs to collect a huge library of cute critters.
+
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen?style=for-the-badge&logo=github)](https://sarwesv.github.io/Prodigymind/)
+
+---
 
 ## ✨ Features
 
-- **Two modes**
-  - **📚 Learn** — bite-sized flash cards. Tap to flip a card and see the capital.
-  - **🎯 Quiz** — four Blooket-style game modes: Classic, Backwards, Streak Rush,
-    and Type It.
-- **🪙 Coins & 🎁 Packs** — earn coins from lessons and quizzes, then spend them
-  in the Pack Shop. Each pack (Farm, Mammal, Bird, Ocean, Safari, Reptile, Bug,
-  Polar, Dino, Mythical) gives a **surprise animal** with a physical-toy-style
-  opening animation that shows the pack name.
-- **Rarities & duplicates** — animals come in Common → Uncommon → Rare → Epic →
-  Legendary. You can get doubles, and the collection tracks how many you own.
-- **Pick your states** — choose any states, whole regions, or tap **Select All 50**.
-- **No cheating the system** — coins are tied to **one-time milestones** (first
-  time you study, first time you answer right, first time you master a state).
-  Replaying states you've already done earns **0 coins**, so there's nothing to grind.
-- **📈 Progress chart** — your quiz scores are saved and drawn on a chart.
-- **🌗 Auto dark/light theme** — follows your device automatically (or force one).
-- **👋 First-time tutorial** — friendly arrow coach-marks show you around, **once**.
-  Skippable and replayable from Settings. A ❓ help guide sits next to Settings.
-- **📱 Responsive** — works on phones, tablets, and desktops.
-- **💾 Saves automatically** to your browser's `localStorage`.
-- **✨ GSAP animations** with graceful fallback if the library can't load.
+- **Two Core Modes**
+  - **📚 Learn** — Bite-sized flash cards. Tap to flip a card and see the capital or answer.
+  - **🎯 Quiz & Test** — Four Blooket-style game modes (Classic, Backwards, Streak Rush, and Type It) plus a mixed Test mode.
+- **🪙 Coins & 🎁 Pack Shop** — Earn coins from milestone achievements in quizzes, then spend them in the Pack Shop. Each pack (Farm, Mammal, Bird, Ocean, Safari, Reptile, Bug, Polar, Dino, Mythical) awards a surprise animal with a physical-toy opening animation.
+- **⭐ Rarities & Duplicates** — Animals range from Common → Uncommon → Rare → Epic → Legendary. Collect duplicates and track your total count!
+- **🗺️ Flexible Region Selection** — Choose specific states, whole regions (Northeast, South, Midwest, West, Pacific/Territories), or tap **Select All 50**.
+- **🚫 Anti-Grind Milestone Economy** — Coins are tied to one-time milestones (first correct answer, first state mastery). Replaying already-mastered content earns 0 coins to maintain fair progression.
+- **📈 Progress Tracking** — Quiz scores and performance data are stored locally and plotted on an interactive progress chart.
+- **🎨 Custom Styling & Neomorphism** — Toggle soft 3D neomorphic styling on/off in ⚙️ Settings.
+- **🌗 Dark / Light Mode** — Automatic system theme detection with manual override options.
+- **👋 Guided Tutorial** — Interactive coach-marks guide first-time learners around the dashboard.
+- **📱 Fully Responsive & Offline Ready** — Built entirely with emoji graphics (no external image assets needed) and operates completely offline once loaded.
 
-Everything (animals included) is built from **emoji**, so the app needs **no
-image files** and works fully offline once loaded.
+---
 
-## 🚀 How to publish on GitHub Pages
+## 🚀 Live Demo & Deployment
 
-This is a plain static site (just `index.html`, `css/`, and `js/`), so GitHub
-Pages can host it directly.
+The application is hosted on **GitHub Pages**:
+🔗 **[https://sarwesv.github.io/Prodigymind/](https://sarwesv.github.io/Prodigymind/)**
 
-1. **Get the code onto your default branch.** This work is on the branch
-   `claude/state-capitals-learning-app-5zlqls`. Open a Pull Request and merge it
-   into `main` (or whatever your default branch is).
-2. On GitHub, go to your repository's **Settings → Pages**.
-3. Under **Build and deployment → Source**, choose **Deploy from a branch**.
-4. Set **Branch** to `main` and the folder to **`/ (root)`**, then click **Save**.
-5. Wait about a minute. Your app will be live at:
-   `https://sarwesv.github.io/us-state-capitals-quiz/`
+### Deploying to GitHub Pages
 
-To publish without merging first, you can instead pick the
-`claude/state-capitals-learning-app-5zlqls` branch in step 4 — but merging to
-your default branch is the tidy long-term setup.
+1. Push your changes to the `main` branch of [sarwesv/Prodigymind](https://github.com/sarwesv/Prodigymind).
+2. On GitHub, navigate to **Settings → Pages**.
+3. Under **Build and deployment → Source**, select **Deploy from a branch**.
+4. Set the branch to `main` and folder to `/ (root)`, then click **Save**.
 
-### Run it locally
+---
 
-Just open `index.html` in a browser, or serve the folder:
+## 💻 Local Development
+
+No build tools, bundlers, or `npm install` required! Simply open `index.html` in your browser or run a lightweight local HTTP server:
 
 ```bash
+# Serve locally using Python
 python3 -m http.server 8000
-# then visit http://localhost:8000
+
+# Then open http://localhost:8000 in your browser
 ```
 
-## 🗂️ Project structure
+### Syntax Validation
+Before committing JavaScript changes, run Node check syntax validation:
+
+```bash
+node --check js/app.js && node --check js/storage.js && node --check js/data.js
+```
+
+---
+
+## 🗂️ Project Structure
 
 ```
-index.html      # markup + screens
-css/styles.css  # theme tokens, neomorphism, layout, animations
-js/data.js      # all 50 states, packs, rarities, helpers
-js/storage.js   # localStorage load/save
-js/app.js       # navigation, learn, quiz, shop, packs, tutorial, chart
+├── index.html      # Main HTML structure, screens, and modal overlays
+├── css/
+│   └── styles.css  # CSS variables, neomorphism styles, layout, and animations
+└── js/
+    ├── data.js     # Static datasets (50 states, regions, animal packs, rarities)
+    ├── storage.js  # LocalStorage wrapper & default schema
+    └── app.js      # App lifecycle, screen navigation, quiz logic, shop & collection
 ```
+
+---
+
+## 🤝 Repository & Contributing
+
+- **Repository URL:** [https://github.com/sarwesv/Prodigymind.git](https://github.com/sarwesv/Prodigymind.git)
+- All changes are continuously committed and pushed to the `main` branch.
+
