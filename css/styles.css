@@ -6,24 +6,24 @@
 /* ---- MD3 design tokens -------------------------------------- */
 :root {
   /* MD3 color scheme — light */
-  --md-primary:             #5B7CFA;
+  --md-primary:             #4F6EF7;
   --md-on-primary:          #FFFFFF;
-  --md-primary-container:   #DBE3FF;
-  --md-on-primary-container:#001356;
-  --md-secondary:           #34C98B;
+  --md-primary-container:   #4F6EF7;
+  --md-on-primary-container:#FFFFFF;
+  --md-secondary:           #22C55E;
   --md-on-secondary:        #FFFFFF;
-  --md-secondary-container: #C5F5E2;
-  --md-tertiary:            #EF5F6B;
+  --md-secondary-container: #DCFCE7;
+  --md-tertiary:            #EF4444;
   --md-on-tertiary:         #FFFFFF;
-  --md-surface:             #FFFBFE;
-  --md-surface-variant:     #E4E1F0;
-  --md-surface-container:   #F0EDF9;
-  --md-on-surface:          #1C1B1F;
-  --md-on-surface-variant:  #47464F;
-  --md-outline:             #787480;
-  --md-outline-variant:     #CAC4D0;
-  --md-background:          #F6F3FF;
-  --md-gold:                #F6B73C;
+  --md-surface:             #FFFFFF;
+  --md-surface-variant:     #E8E3F5;
+  --md-surface-container:   #F4F1FB;
+  --md-on-surface:          #191824;
+  --md-on-surface-variant:  #3C394A;
+  --md-outline:             #938EA0;
+  --md-outline-variant:     #D8D3E5;
+  --md-background:          #F4F1FC;
+  --md-gold:                #F59E0B;
 
   /* Legacy aliases → MD3 tokens */
   --bg:        var(--md-background);
@@ -38,9 +38,9 @@
   --radius-lg: 28px;
 
   /* MD3 elevation shadows — light */
-  --elev-1: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
-  --elev-2: 0 1px 2px rgba(0,0,0,.3), 0 2px 6px 2px rgba(0,0,0,.15);
-  --elev-3: 0 4px 8px 3px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.3);
+  --elev-1: 0 2px 8px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  --elev-2: 0 4px 16px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.06);
+  --elev-3: 0 8px 30px rgba(0,0,0,.16), 0 4px 8px rgba(0,0,0,.08);
 
   /* Legacy shadow aliases */
   --shadow-out: var(--elev-1);
@@ -53,53 +53,53 @@
 /* Dark theme — kicks in automatically from the device setting. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --md-primary:             #BCC4FF;
-    --md-on-primary:          #1D2D6A;
-    --md-primary-container:   #354391;
-    --md-on-primary-container:#DBE3FF;
-    --md-secondary:           #56DBA4;
-    --md-on-secondary:        #003924;
-    --md-secondary-container: #005136;
-    --md-tertiary:            #F2B8B5;
-    --md-on-tertiary:         #601410;
-    --md-surface:             #1C1B1F;
-    --md-surface-variant:     #2B2930;
-    --md-surface-container:   #211F26;
-    --md-on-surface:          #E6E1E5;
-    --md-on-surface-variant:  #CAC4D0;
-    --md-outline:             #938F99;
-    --md-outline-variant:     #49454F;
-    --md-background:          #141218;
-    --md-gold:                #F6B73C;
+    --md-primary:             #8198FF;
+    --md-on-primary:          #0F1B4E;
+    --md-primary-container:   #344EC4;
+    --md-on-primary-container:#FFFFFF;
+    --md-secondary:           #4ADE80;
+    --md-on-secondary:        #00391A;
+    --md-secondary-container: #15803D;
+    --md-tertiary:            #F87171;
+    --md-on-tertiary:         #450A0A;
+    --md-surface:             #1C1A24;
+    --md-surface-variant:     #2B2836;
+    --md-surface-container:   #23202E;
+    --md-on-surface:          #F3F0F8;
+    --md-on-surface-variant:  #D1CBDE;
+    --md-outline:             #9D96AC;
+    --md-outline-variant:     #443F52;
+    --md-background:          #121018;
+    --md-gold:                #FBBF24;
 
-    --elev-1: 0 1px 2px rgba(0,0,0,.5), 0 1px 3px 1px rgba(0,0,0,.3);
-    --elev-2: 0 1px 2px rgba(0,0,0,.5), 0 2px 6px 2px rgba(0,0,0,.3);
-    --elev-3: 0 4px 8px 3px rgba(0,0,0,.3), 0 1px 3px rgba(0,0,0,.5);
+    --elev-1: 0 2px 8px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.2);
+    --elev-2: 0 4px 16px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.3);
+    --elev-3: 0 8px 30px rgba(0,0,0,.6), 0 4px 10px rgba(0,0,0,.4);
   }
 }
 
 /* Manual theme overrides let a user force a look if they want. */
 :root[data-theme="light"] {
-  --md-primary:             #5B7CFA;
+  --md-primary:             #4F6EF7;
   --md-on-primary:          #FFFFFF;
-  --md-primary-container:   #DBE3FF;
-  --md-on-primary-container:#001356;
-  --md-secondary:           #34C98B;
+  --md-primary-container:   #4F6EF7;
+  --md-on-primary-container:#FFFFFF;
+  --md-secondary:           #22C55E;
   --md-on-secondary:        #FFFFFF;
-  --md-secondary-container: #C5F5E2;
-  --md-tertiary:            #EF5F6B;
+  --md-secondary-container: #DCFCE7;
+  --md-tertiary:            #EF4444;
   --md-on-tertiary:         #FFFFFF;
-  --md-surface:             #FFFBFE;
-  --md-surface-variant:     #E4E1F0;
-  --md-surface-container:   #F0EDF9;
-  --md-on-surface:          #1C1B1F;
-  --md-on-surface-variant:  #47464F;
-  --md-outline:             #787480;
-  --md-outline-variant:     #CAC4D0;
-  --md-background:          #F6F3FF;
-  --elev-1: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
-  --elev-2: 0 1px 2px rgba(0,0,0,.3), 0 2px 6px 2px rgba(0,0,0,.15);
-  --elev-3: 0 4px 8px 3px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.3);
+  --md-surface:             #FFFFFF;
+  --md-surface-variant:     #E8E3F5;
+  --md-surface-container:   #F4F1FB;
+  --md-on-surface:          #191824;
+  --md-on-surface-variant:  #3C394A;
+  --md-outline:             #938EA0;
+  --md-outline-variant:     #D8D3E5;
+  --md-background:          #F4F1FC;
+  --elev-1: 0 2px 8px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  --elev-2: 0 4px 16px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.06);
+  --elev-3: 0 8px 30px rgba(0,0,0,.16), 0 4px 8px rgba(0,0,0,.08);
 }
 :root[data-theme="dark"] {
   --md-primary:             #BCC4FF;
@@ -146,15 +146,16 @@ p { line-height: 1.5; color: var(--text-soft); }
 /* contain:content isolates paint so the browser only repaints this card */
 .neo {
   background: var(--md-surface);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   box-shadow: var(--elev-1);
-  border: none;
+  border: 1px solid var(--md-outline-variant);
   contain: content;
 }
 .neo-inset {
   background: var(--md-surface-container);
   box-shadow: none;
   border-radius: var(--radius);
+  border: 1px solid var(--md-outline-variant);
 }
 
 /* body.flat is a no-op in MD3 — selectors kept for JS compatibility */
@@ -170,8 +171,8 @@ body.flat .btn:active { box-shadow: var(--elev-2); }
 }
 .brand { display: flex; align-items: center; gap: 10px; }
 .brand .logo { font-size: 2rem; }
-.brand h1 { margin: 0; }
-.brand small { display: block; color: var(--text-soft); font-size: 0.8rem; font-weight: 600; }
+.brand h1 { margin: 0; color: var(--md-on-surface); font-weight: 800; }
+.brand small { display: block; color: var(--md-on-surface-variant); font-size: 0.8rem; font-weight: 600; }
 
 .icon-row { display: flex; gap: 10px; }
 
@@ -181,7 +182,7 @@ body.flat .btn:active { box-shadow: var(--elev-2); }
   font-weight: 700;
   color: var(--md-on-surface);
   background: var(--md-surface-variant);
-  border: none;
+  border: 1px solid var(--md-outline-variant);
   border-radius: var(--radius);
   box-shadow: var(--elev-1);
   padding: 14px 20px;
@@ -189,7 +190,7 @@ body.flat .btn:active { box-shadow: var(--elev-2); }
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: box-shadow .2s, transform .1s;
+  transition: box-shadow .2s, transform .1s, background .15s;
   user-select: none;
 }
 /* MD3 state layer */
@@ -211,11 +212,19 @@ body.flat .btn:active { box-shadow: var(--elev-2); }
 .icon-btn {
   width: 52px; height: 52px; padding: 0; font-size: 1.4rem;
   display: grid; place-items: center; border-radius: 50%;
+  background: var(--md-surface);
+  color: var(--md-on-surface);
+  border: 1px solid var(--md-outline-variant);
+  box-shadow: var(--elev-1);
+}
+.icon-btn:hover {
+  background: var(--md-surface-variant);
+  box-shadow: var(--elev-2);
 }
 
-.btn-primary { color: var(--md-on-primary);   background: var(--md-primary);   box-shadow: var(--elev-1); }
-.btn-accent  { color: var(--md-on-secondary); background: var(--md-secondary); box-shadow: var(--elev-1); }
-.btn-danger  { color: var(--md-on-tertiary);  background: var(--md-tertiary);  box-shadow: var(--elev-1); }
+.btn-primary { color: var(--md-on-primary);   background: var(--md-primary);   border-color: var(--md-primary); box-shadow: var(--elev-1); }
+.btn-accent  { color: var(--md-on-secondary); background: var(--md-secondary); border-color: var(--md-secondary); box-shadow: var(--elev-1); }
+.btn-danger  { color: var(--md-on-tertiary);  background: var(--md-tertiary);  border-color: var(--md-tertiary); box-shadow: var(--elev-1); }
 .btn-primary:hover, .btn-accent:hover, .btn-danger:hover { box-shadow: var(--elev-2); filter: none; }
 .btn-block { width: 100%; }
 .btn-lg { font-size: 1.2rem; padding: 18px 24px; }
@@ -478,12 +487,13 @@ body.answers-grid .answer {
   background: var(--md-surface-container); box-shadow: var(--elev-3);
   max-height: 88vh; overflow-y: auto;
 }
-.modal h2 { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
-.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--md-outline-variant); }
+.modal h2 { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-weight: 800; color: var(--md-on-surface); }
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--md-outline-variant); }
 .setting-row:last-child { border-bottom: none; }
-.setting-row .desc { font-size: 0.8rem; color: var(--text-soft); }
+.setting-row strong { color: var(--md-on-surface); font-weight: 700; font-size: 0.95rem; }
+.setting-row .desc { font-size: 0.85rem; color: var(--md-on-surface-variant); font-weight: 500; margin-top: 2px; }
 
-/* Toggle switch — MD3 style */
+/* Toggle switch — MD3 high contrast style */
 .switch { position: relative; width: 52px; height: 32px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; position: absolute; }
 .slider {
@@ -493,18 +503,19 @@ body.answers-grid .answer {
   transition: background .2s, border-color .2s;
 }
 .slider::before {
-  content: ''; position: absolute; height: 16px; width: 16px;
-  left: 6px; top: 50%; transform: translateY(-50%);
+  content: ''; position: absolute; height: 20px; width: 20px;
+  left: 4px; top: 50%; transform: translateY(-50%);
   border-radius: 50%; background: var(--md-outline);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   transition: transform .2s, width .1s, height .1s, background .2s;
 }
 .switch input:checked + .slider            { background: var(--md-primary); border-color: var(--md-primary); }
-.switch input:checked + .slider::before   { transform: translateX(20px) translateY(-50%); background: var(--md-on-primary); width: 24px; height: 24px; left: 2px; }
+.switch input:checked + .slider::before   { transform: translateX(20px) translateY(-50%); background: var(--md-on-primary); }
 
-/* Segmented buttons — MD3 style */
-.seg { display: inline-flex; gap: 4px; background: var(--md-surface-variant); border-radius: var(--radius); padding: 4px; }
-.seg button { padding: 7px 14px; font-size: 0.85rem; border-radius: 12px; background: transparent; box-shadow: none; color: var(--md-on-surface-variant); }
-.seg button.active { background: var(--md-primary-container); color: var(--md-on-primary-container); box-shadow: none; }
+/* Segmented buttons — MD3 high-contrast vibrant style */
+.seg { display: inline-flex; gap: 4px; background: var(--md-surface-variant); border-radius: var(--radius); padding: 4px; border: 1px solid var(--md-outline-variant); }
+.seg button { padding: 8px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 12px; background: transparent; box-shadow: none; color: var(--md-on-surface-variant); transition: all 0.15s ease; }
+.seg button.active { background: var(--md-primary); color: var(--md-on-primary); font-weight: 800; box-shadow: 0 2px 8px rgba(79, 110, 247, 0.35); }
 
 /* In-game confirm dialog (replaces the browser's confirm popup). */
 .confirm-modal { max-width: 360px; text-align: center; }
