@@ -22,8 +22,6 @@ library of cute critters!
   time you study, first time you answer right, first time you master a state).
   Replaying states you've already done earns **0 coins**, so there's nothing to grind.
 - **📈 Progress chart** — your quiz scores are saved and drawn on a chart.
-- **🎨 Neomorphism toggle** — switch the soft 3D look on/off anytime from the
-  ⚙️ settings gear.
 - **🌗 Auto dark/light theme** — follows your device automatically (or force one).
 - **👋 First-time tutorial** — friendly arrow coach-marks show you around, **once**.
   Skippable and replayable from Settings. A ❓ help guide sits next to Settings.
