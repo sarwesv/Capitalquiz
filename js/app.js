@@ -1522,6 +1522,7 @@
   });
 
   on("#settingsBtn", "click", () => show("settings"));
+  on("#settingsBack", "click", () => { show("home"); renderHome(); });
   on("#closeSettings", "click", () => { show("home"); renderHome(); });
     on("#profileSignOutBtn", "click", async () => {
     if (!window.FirebaseService) return;
