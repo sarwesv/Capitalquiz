@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="A fun, rewarding way to learn — state capitals, math, reading, and more. Quizzes, mastery levels, and unlockable animal friends!" />
+  <meta name="theme-color" content="#5b7cfa" />
+  <title>ProdigyMind — Learn Anything</title>
+  <meta property="og:title" content="ProdigyMind — Learn Anything" />
+  <meta property="og:description" content="A fun, rewarding way to learn — state capitals, math, reading, and more. Quizzes, mastery levels, and unlockable animal friends!" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="ProdigyMind — Learn Anything" />
+  <meta name="twitter:description" content="A fun, rewarding way to learn — state capitals, math, reading, and more. Quizzes, mastery levels, and unlockable animal friends!" />
+
+  <!-- Kid-friendly rounded font. Falls back gracefully if offline. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>" />
+</head>
+<body>
+  <div class="app">
+    <!-- ===== Top bar (always visible) ===== -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">🧠</span>
+        <div>
+          <h1>ProdigyMind</h1>
+          <small>Learn anything!</small>
+        </div>
+      </div>
+      <div class="user-auth-wrap" id="userAuthWrap">
+        <button id="googleSignInBtn" class="btn auth-btn" title="Sign in with Google to sync progress">
+          <span class="auth-icon">🔑</span>
+          <span class="auth-label">Sign In</span>
+        </button>
+        <div id="userProfilePill" class="user-pill hidden" role="button" tabindex="0" title="Account settings & sync">
+          <img id="userAvatar" class="user-avatar" src="" alt="User avatar" />
+          <span id="userName" class="user-name">User</span>
+        </div>
+      </div>
+      <div class="icon-row">
+        <button id="helpBtn" class="btn icon-btn" title="Help guide" aria-label="Help guide">❓</button>
+        <button id="settingsBtn" class="btn icon-btn" title="Settings" aria-label="Settings">⚙️</button>
+      </div>
+    </header>
+
+    <!-- ===== HOME screen ===== -->
+    <main id="screen-home" class="screen">
+      <!-- Subject banner -->
+      <div class="subject-banner neo" id="subjectBanner" role="button" tabindex="0" aria-label="Change subject">
+        <span id="subjectEmoji" class="subject-emoji">🗺️</span>
+        <div class="subject-banner-text">
+          <div id="subjectName" class="subject-name">State Capitals</div>
+          <div class="muted" style="font-size:0.8rem;">Tap to change subject</div>
+        </div>
+        <span class="subject-caret">›</span>
+      </div>
+      <div class="mode-grid">
+        <div class="mode-card neo" id="goLearn" role="button" tabindex="0">
+          <span class="big-emoji">📚</span>
+          <h2>Learn</h2>
+          <p>Flip cards and study capitals one bite at a time.</p>
+        </div>
+        <div class="mode-card neo" id="goQuiz" role="button" tabindex="0">
+          <span class="big-emoji">🎯</span>
+          <h2>Quiz</h2>
+          <p>Play a game and earn coins to buy animal packs!</p>
+        </div>
+        <div class="mode-card neo" id="goTest" role="button" tabindex="0">
+          <span class="big-emoji">📝</span>
+          <h2>Test</h2>
+          <p>The real challenge — mixes multiple-choice <em>and</em> typing!</p>
+        </div>
+      </div>
+
+      <!-- Resume paused quizzes (only shows when you have some) -->
+      <section class="panel neo hidden" id="resumePanel">
+        <h2>⏸️ Resume a Quiz</h2>
+        <p class="muted">You left these part-way. Pick up where you stopped, or delete one to start it fresh next time.</p>
+        <div id="resumeList" class="resume-list"></div>
+      </section>
+
+      <!-- Progress panel with chart -->
+      <section class="panel neo" id="progressPanel">
+        <h2>📈 Your Progress</h2>
+        <div class="stat-row">
+          <div class="stat"><div class="num" id="statMastered">0</div><div class="lbl">States Mastered</div></div>
+          <div class="stat"><div class="num" id="statCoins">0</div><div class="lbl">🪙 Coins</div></div>
+          <div class="stat"><div class="num" id="statAnimals">0</div><div class="lbl">Animals</div></div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="progressChart" width="600" height="160" aria-label="Quiz score history chart"></canvas>
+          <div id="chartEmpty" class="chart-empty">Take a quiz to start your progress chart! 🌟</div>
+        </div>
+      </section>
+
+      <!-- Time on task -->
+      <section class="panel neo" id="timePanel">
+        <h2>⏱️ Time on Task</h2>
+        <div class="stat-row">
+          <div class="stat"><div class="num" id="statTotalTime">0s</div><div class="lbl">Total Time</div></div>
+          <div class="stat"><div class="num" id="statActivities">0</div><div class="lbl">Activities</div></div>
+        </div>
+        <button class="btn btn-block history-toggle" id="historyToggle" aria-expanded="false">
+          <span>📜 Activity history</span>
+          <span id="historyCaret" class="history-caret">▸</span>
+        </button>
+        <div id="historyBody" class="history-body hidden">
+          <p class="muted">Every lesson and quiz you do, with how long it took. Tap one to open it and see the questions it covered.</p>
+          <div id="activityList" class="activity-list"></div>
+        </div>
+      </section>
+
+      <!-- Pack shop -->
+      <section class="panel neo" id="shopPanel">
+        <button class="btn btn-block history-toggle" id="shopToggle" aria-expanded="true">
+          <span>🏪 Pack Shop <span class="coin-badge neo-inset"><span id="shopCoins">0</span> 🪙</span></span>
+          <span id="shopCaret" class="history-caret">▾</span>
+        </button>
+        <div id="shopBody" class="history-body">
+          <p class="muted">Earn coins from lessons &amp; quizzes, then buy animal packs. Each pack gives a surprise animal — some are super rare! You can get doubles too.</p>
+          <div class="shop-grid" id="shopGrid"></div>
+        </div>
+      </section>
+
+      <!-- Animal collection -->
+      <section class="panel neo" id="zooPanel">
+        <button class="btn btn-block history-toggle" id="collectionToggle" aria-expanded="true">
+          <span>🐾 My Collection <span class="coin-badge neo-inset"><span id="collCount">0</span> / <span id="collTotal">0</span></span></span>
+          <span id="collectionCaret" class="history-caret">▾</span>
+        </button>
+        <div id="collectionBody" class="history-body">
+        <p class="muted">Every animal you've found from packs. Tap an animal to see its rarity — or sell doubles for coins!</p>
+        <div class="seg coll-group" id="collGroupSeg">
+          <button data-group="pack" class="btn active">By Pack</button>
+          <button data-group="rarity" class="btn">By Rarity</button>
+        </div>
+        <div id="zooBody"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===== STATE PICKER screen ===== -->
+    <main id="screen-picker" class="screen hidden">
+      <button class="back-link" data-go="home">← Back</button>
+      <div class="picker-head">
+        <h2 id="pickerTitle">Pick your states</h2>
+        <span class="count-pill neo-inset" id="pickCount">0 picked</span>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+        <button class="btn btn-primary" id="pickAll">✅ Select All 50</button>
+        <button class="btn" id="pickNone">Clear</button>
+      </div>
+      <div id="pickerRegions"></div>
+      <div class="spacer"></div>
+      <button class="btn btn-accent btn-block btn-lg" id="startFromPicker">Start! 🚀</button>
+    </main>
+
+    <!-- ===== LEARN screen ===== -->
+    <main id="screen-learn" class="screen hidden">
+      <div class="task-head">
+        <button class="back-link" id="exitLearn">← Exit lesson</button>
+        <span id="learnTimer" class="task-timer neo-inset" title="Time on this lesson">⏱️ 0:00</span>
+      </div>
+      <div class="progress-bar neo-inset"><span id="learnBar"></span></div>
+      <p class="center muted" id="learnCounter"></p>
+      <div class="lesson-wrap">
+        <div class="flash-card neo" id="flashCard" role="button" tabindex="0">
+          <!-- filled by JS -->
+        </div>
+        <div class="lesson-nav">
+          <button class="btn" id="learnPrev">← Back</button>
+          <button class="btn btn-primary" id="learnNext">Next →</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== QUIZ MODE PICKER (Blooket-style) ===== -->
+    <main id="screen-qmode" class="screen hidden">
+      <button class="back-link" data-go="picker-quiz">← Back</button>
+      <h2>Choose your game 🎮</h2>
+      <p class="muted">Every mode teaches the same capitals — pick the one that's the most fun for you!</p>
+      <div class="qmode-grid" id="qmodeGrid"></div>
+    </main>
+
+    <!-- ===== QUIZ screen ===== -->
+    <main id="screen-quiz" class="screen hidden">
+      <div class="task-head">
+        <button class="back-link" id="exitQuiz">← Exit quiz</button>
+        <span id="quizTimer" class="task-timer neo-inset" title="Time on this quiz">⏱️ 0:00</span>
+      </div>
+      <div class="quiz-head">
+        <div class="progress-bar neo-inset" style="flex:1;"><span id="quizBar"></span></div>
+        <span class="streak" id="quizStreak">🔥 0</span>
+      </div>
+      <p class="center muted" id="quizCounter"></p>
+      <div class="question-card neo" id="questionCard"></div>
+      <div class="answer-grid" id="answerGrid"></div>
+    </main>
+
+    <!-- ===== RESULTS screen ===== -->
+    <main id="screen-results" class="screen hidden">
+      <div class="result-wrap" id="resultWrap"></div>
+    </main>
+
+    <!-- ===== SETTINGS screen ===== -->
+    <main id="screen-settings" class="screen hidden">
+      <button class="back-link" data-go="home">← Back</button>
+      <div class="panel neo">
+        <h2>⚙️ Settings</h2>
+        <div class="setting-row">
+          <div>
+            <strong>Account &amp; Cloud Sync</strong>
+            <div class="desc" id="settingsAuthDesc">Signed in as Guest. Sign in with Google to sync progress across devices.</div>
+          </div>
+          <button class="btn btn-primary" id="settingsAuthBtn">Sign In</button>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <strong>Theme</strong>
+            <div class="desc">Auto follows your device.</div>
+          </div>
+          <div class="seg" id="themeSeg">
+            <button data-theme="auto" class="btn">Auto</button>
+            <button data-theme="light" class="btn">☀️</button>
+            <button data-theme="dark" class="btn">🌙</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <strong>Answer buttons</strong>
+            <div class="desc">Squares (2×2) or a stacked list.</div>
+          </div>
+          <div class="seg" id="layoutSeg">
+            <button data-layout="grid" class="btn">▦ Squares</button>
+            <button data-layout="stack" class="btn">▤ Stacked</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <strong>Replay the tutorial</strong>
+            <div class="desc">See the arrow guide again.</div>
+          </div>
+          <button class="btn" id="replayTutorial">Show me</button>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <strong>Reset all progress</strong>
+            <div class="desc">Erases stars, animals &amp; chart.</div>
+          </div>
+          <button class="btn" id="resetProgress" style="color:var(--danger)">Reset</button>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn btn-primary btn-block" id="closeSettings">Done</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== Profile modal ===== -->
+  <div id="profileOverlay" class="overlay hidden">
+    <div class="modal neo">
+      <h2>👤 My Account</h2>
+      <div class="profile-info" id="profileInfo">
+        <div class="profile-avatar-wrap" id="profileAvatarWrap" role="button" tabindex="0" title="Change avatar">
+          <img id="profileAvatar" class="profile-avatar" src="" alt="Avatar" />
+          <span class="avatar-edit-hint">✏️</span>
+        </div>
+        <div>
+          <div id="profileName" class="profile-name"></div>
+          <div id="profileEmail" class="profile-email muted"></div>
+        </div>
+      </div>
+      <div id="avatarPicker" class="avatar-picker hidden">
+        <p class="muted" style="font-size:0.85rem; margin-bottom:8px;">Pick an unlocked animal — or use your Google photo.</p>
+        <div id="avatarOptions" class="avatar-options"></div>
+      </div>
+      <div class="setting-row">
+        <div>
+          <strong>Stay signed in</strong>
+          <div class="desc">Keep me logged in when I close the browser.</div>
+        </div>
+        <label class="switch"><input type="checkbox" id="staySignedInToggle" /><span class="slider"></span></label>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-block" id="profileSignOutBtn" style="color:var(--danger)">Sign Out</button>
+      <div class="spacer"></div>
+      <button class="btn btn-primary btn-block" id="closeProfile">Done</button>
+    </div>
+  </div>
+
+  <!-- ===== Help modal ===== -->
+  <div id="helpOverlay" class="overlay hidden">
+    <div class="modal neo">
+      <h2>❓ Help Guide</h2>
+      <div class="help-step"><span class="n">1</span><div><strong>Learn</strong> flips flash cards so you can study a few states at a time. Tap a card to reveal the capital!</div></div>
+      <div class="help-step"><span class="n">2</span><div><strong>Quiz</strong> lets you pick a fun game mode. Answer questions to earn 🪙 coins.</div></div>
+      <div class="help-step"><span class="n">3</span><div><strong>Test 📝</strong> is the real challenge — every question is a mix of multiple-choice <em>and</em> typing. Pick any states or all 50.</div></div>
+      <div class="help-step"><span class="n">4</span><div><strong>Pick states</strong> before you start. Choose a region, a few states, or tap <em>Select All 50</em>.</div></div>
+      <div class="help-step"><span class="n">5</span><div>Spend coins in the <strong>Pack Shop</strong> to open animal packs 🎁 — some animals are super rare! Collect them all 🐶🦄.</div></div>
+      <div class="help-step"><span class="n">6</span><div>Your <strong>progress</strong> is saved automatically and shown on the chart.</div></div>
+      <div class="help-step"><span class="n">7</span><div>Tap <strong>⚙️ Settings</strong> to change the look, theme, answer buttons, or replay this guide's arrows.</div></div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary btn-block" id="closeHelp">Got it!</button>
+    </div>
+  </div>
+
+  <!-- ===== Animal detail modal ===== -->
+  <div id="animalOverlay" class="overlay hidden">
+    <div class="modal neo animal-modal">
+      <div id="animalBox"></div>
+    </div>
+  </div>
+
+  <!-- ===== Pack-opening modal ===== -->
+  <div id="packOverlay" class="overlay hidden">
+    <div class="modal neo pack-modal">
+      <div id="packBox" class="pack-box"></div>
+    </div>
+  </div>
+
+  <!-- ===== Tutorial coach-mark layer ===== -->
+  <div id="coachLayer" class="coach-overlay hidden"></div>
+
+  <!-- ===== Subject picker modal ===== -->
+  <div id="subjectOverlay" class="overlay hidden">
+    <div class="modal neo">
+      <h2>📚 Choose a Subject</h2>
+      <input type="search" id="subjectSearch" class="subject-search" placeholder="Search subjects…" autocomplete="off">
+      <div id="subjectFilters" class="subject-filters"></div>
+      <div id="subjectList"></div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary btn-block" id="closeSubject">Done</button>
+    </div>
+  </div>
+
+  <!-- GSAP for animations (from CDN). App still works if it fails to load. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script type="module" src="js/firebase.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
