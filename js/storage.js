@@ -3,8 +3,8 @@
    Keeps the rest of the app from worrying about save/load.
    ============================================================ */
 
-const STORAGE_KEY = "prodigymind.v1";
-const LEGACY_STORAGE_KEY = "capitalsQuest.v1";
+const STORAGE_KEY = "capitalsquest.v1";
+const LEGACY_STORAGE_KEY = "prodigymind.v1";
 
 // The shape of a brand-new save file.
 function defaultSave() {
