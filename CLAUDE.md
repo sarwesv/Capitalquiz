@@ -4,9 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**ProdigyMind** — a static, single-page web app that helps kids (aimed at a
-5th-grade reading level) learn US state capitals, 1st-grade math, reading (Dolch
-sight words), and more. It runs entirely in the browser with **no build step, no
+**Capitals Quest** — a static, single-page web app that helps learners master
+US state capitals. It runs entirely in the browser with **no build step, no
 framework, and no backend**. It's designed to be hosted on GitHub Pages.
 
 ## Running it

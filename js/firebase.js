@@ -43,7 +43,7 @@ export function initFirebase(onAuthChanged, onSyncStatus) {
   syncStatusCallback = onSyncStatus;
 
   if (!window.isFirebaseConfigured || !window.isFirebaseConfigured()) {
-    console.warn("ProdigyMind: Firebase config missing or contains placeholders. Running in offline/guest mode.");
+    console.warn("Capitals Quest: Firebase config missing or contains placeholders. Running in offline/guest mode.");
     setSyncStatus("offline", "Config unconfigured");
     if (typeof authChangedCallback === "function") {
       authChangedCallback(null);
