@@ -85,6 +85,7 @@ function persist(save) {
 
 // Get (or create) the progress record for one state.
 function stateProgress(save, abbr) {
+  if (!save.progress) save.progress = {};
   if (!save.progress[abbr]) {
     save.progress[abbr] = { seen: false, correct: 0, attempts: 0, mastered: false };
   }
@@ -93,12 +94,18 @@ function stateProgress(save, abbr) {
 
 // Count how many states are fully mastered.
 function masteredCount(save) {
-  return Object.values(save.progress).filter((p) => p.mastered).length;
+  if (!save.progress) return 0;
+  return Object.values(save.progress).filter((p) => p && p.mastered).length;
 }
 
 // Wipe everything (used by the "reset progress" button in settings).
 function clearSave() {
-  localStorage.removeItem(STORAGE_KEY);
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+  } catch (e) {
+    console.warn("Could not clear storage:", e);
+  }
 }
 
 // Get (or create) the progress record for a non-capitals subject item.

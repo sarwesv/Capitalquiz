@@ -476,6 +476,13 @@ body.answers-grid .answer {
 .reward-pop .r-emoji { font-size: 4rem; }
 .reward-pop .r-name { font-size: 1.4rem; font-weight: 800; color: var(--md-secondary); }
 .confetti { position: fixed; top: -10px; width: 10px; height: 14px; z-index: 50; pointer-events: none; border-radius: 2px; }
+@keyframes fallConfetti {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+}
+.confetti-fallback {
+  animation: fallConfetti 2.4s ease-in forwards;
+}
 
 /* ---- Settings + Help modals --------------------------------- */
 .overlay {

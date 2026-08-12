@@ -50,7 +50,7 @@
       if (!sfxCache[name]) {
         sfxCache[name] = new Audio("audio/" + name + ".mp3");
       }
-      const audio = sfxCache[name];
+      const audio = sfxCache[name].cloneNode();
       audio.currentTime = 0;
       audio.play().catch(() => {});
     } catch (e) {
@@ -553,7 +553,7 @@
 
       const head = document.createElement("h3");
       head.innerHTML = REGION_EMOJI[region] + " " + region +
-        ' <span class="region-toggle" data-region="' + region + '">Select region</span>';
+        ' <span class="region-toggle" data-region="' + region + '" role="button" tabindex="0">Select region</span>';
       block.appendChild(head);
 
       const grid = document.createElement("div");
@@ -562,11 +562,20 @@
         const chip = document.createElement("div");
         chip.className = "chip neo";
         chip.style.position = "relative";
+        chip.setAttribute("role", "button");
+        chip.setAttribute("tabindex", "0");
+        chip.setAttribute("aria-label", s.state);
         chip.dataset.abbr = s.abbr;
-        const p = save.progress[s.abbr];
+        const p = save.progress ? save.progress[s.abbr] : null;
         const star = p && p.mastered ? '<span class="star">⭐</span>' : "";
         chip.innerHTML = star + s.state + "<small>" + s.abbr + "</small>";
         chip.addEventListener("click", function () { toggleChip(s.abbr, chip); });
+        chip.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggleChip(s.abbr, chip);
+          }
+        });
         grid.appendChild(chip);
       });
       block.appendChild(grid);
@@ -575,7 +584,7 @@
 
     // "Select region" quick buttons.
     $$(".region-toggle").forEach(function (btn) {
-      btn.addEventListener("click", function (e) {
+      const toggleFn = function (e) {
         e.stopPropagation();
         const region = btn.dataset.region;
         const abbrs = statesInRegion(region).map(function (s) { return s.abbr; });
@@ -585,6 +594,13 @@
         });
         syncChips();
         updatePickCount();
+      };
+      btn.addEventListener("click", toggleFn);
+      btn.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleFn(e);
+        }
       });
     });
   }
@@ -752,8 +768,18 @@
     QUIZ_MODES.forEach(function (m) {
       const el = document.createElement("div");
       el.className = "qmode neo";
+      el.setAttribute("role", "button");
+      el.setAttribute("tabindex", "0");
+      el.setAttribute("aria-label", m.name + ": " + m.desc);
       el.innerHTML = '<span class="big-emoji">' + m.emoji + "</span><h3>" + m.name + "</h3><small>" + m.desc + "</small>";
-      el.addEventListener("click", function () { quizMode = m.id; startQuiz(Array.from(selected)); });
+      const startFn = function () { quizMode = m.id; startQuiz(Array.from(selected)); };
+      el.addEventListener("click", startFn);
+      el.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          startFn();
+        }
+      });
       grid.appendChild(el);
     });
     show("qmode");
@@ -1072,7 +1098,9 @@
 
     const shopBtn = $("#goShop");
     if (shopBtn) shopBtn.addEventListener("click", () => {
+      save.shopOpen = true;
       show("home"); renderHome();
+      applyShopState();
       $("#shopPanel").scrollIntoView({ behavior: "smooth" });
     });
     on("#playAgain", "click", () => startQuiz(quizAbbrs));
@@ -1099,11 +1127,12 @@
     overlay.classList.remove("hidden");
     box.innerHTML =
       '<div class="pack-title">' + pack.emoji + " " + pack.name + "</div>" +
-      '<div class="pack-parcel" id="packParcel">🎁</div>' +
-      '<div class="pack-tap muted">Tap the package to open it!</div>';
+      '<div class="pack-parcel" id="packParcel" role="button" tabindex="0" aria-label="Tap to open package">🎁</div>' +
+      '<div class="pack-tap muted" role="button" tabindex="0">Tap the package to open it!</div>';
 
     let opened = false;
     const parcel = $("#packParcel");
+    const tapText = box.querySelector(".pack-tap");
 
     // Idle wiggle to invite a tap.
     if (hasGSAP) gsap.to(parcel, { rotation: 5, duration: 0.4, yoyo: true, repeat: -1, ease: "sine.inOut" });
@@ -1157,12 +1186,19 @@
       });
     }
 
-    parcel.addEventListener("click", () => {
+    const triggerOpen = () => {
+      if (opened) return;
       if (hasGSAP) {
         // A quick shake, then reveal.
         gsap.to(parcel, { x: -8, duration: 0.05, repeat: 5, yoyo: true,
           onComplete: () => { gsap.to(parcel, { scale: 1.4, opacity: 0, duration: 0.25, onComplete: reveal }); } });
       } else { reveal(); }
+    };
+
+    parcel.addEventListener("click", triggerOpen);
+    if (tapText) tapText.addEventListener("click", triggerOpen);
+    parcel.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); triggerOpen(); }
     });
   }
 
@@ -1192,7 +1228,8 @@
           onComplete: () => bit.remove(),
         });
       } else {
-        setTimeout(() => bit.remove(), 100);
+        bit.classList.add("confetti-fallback");
+        setTimeout(() => bit.remove(), 2500);
       }
     }
   }
@@ -1448,26 +1485,27 @@
   function renderChart() {
     const canvas = $("#progressChart");
     const empty = $("#chartEmpty");
-    const hist = save.quizHistory;
+    const hist = save.quizHistory || [];
     if (!hist.length) { canvas.classList.add("hidden"); empty.classList.remove("hidden"); return; }
     canvas.classList.remove("hidden"); empty.classList.add("hidden");
 
     const ctx = canvas.getContext("2d");
     // Match canvas resolution to its CSS size for crisp lines.
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * 2;
+    const width = (rect && rect.width > 50 ? rect.width : (canvas.clientWidth || 320));
+    canvas.width = width * 2;
     canvas.height = 160 * 2;
     ctx.scale(2, 2);
-    const W = rect.width, H = 160, pad = 24;
+    const W = width, H = 160, pad = 24;
 
     ctx.clearRect(0, 0, W, H);
     const css = getComputedStyle(document.body);
-    const accent = css.getPropertyValue("--accent").trim() || "#5b7cfa";
-    const accent2 = css.getPropertyValue("--accent-2").trim() || "#34c98b";
+    const accent = css.getPropertyValue("--md-primary").trim() || css.getPropertyValue("--accent").trim() || "#5b7cfa";
+    const accent2 = css.getPropertyValue("--md-secondary").trim() || css.getPropertyValue("--accent-2").trim() || "#34c98b";
     const soft = css.getPropertyValue("--text-soft").trim() || "#888";
 
     // Data = percentage score of each recorded quiz.
-    const pts = hist.map((h) => h.score / h.total);
+    const pts = hist.map((h) => (h && h.total ? Math.min(1, Math.max(0, h.score / h.total)) : 0));
     const n = pts.length;
     const x = (i) => n === 1 ? W / 2 : pad + (i / (n - 1)) * (W - pad * 2);
     const y = (v) => H - pad - v * (H - pad * 2);
