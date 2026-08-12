@@ -173,105 +173,14 @@
 
   // ---- Subject management -----------------------------------
   function getActiveItems() {
-    return getSubjectItems(activeSubject);
-  }
-
-  function switchSubject(id) {
-    activeSubject = id;
-    save.currentSubject = id;
-    persist(save);
-    updateSubjectBanner();
-    renderHome();
+    return getSubjectItems("capitals");
   }
 
   function updateSubjectBanner() {
-    const sub = SUBJECTS.find(function (s) { return s.id === activeSubject; }) || SUBJECTS[0];
     const emojiEl = $("#subjectEmoji");
     const nameEl  = $("#subjectName");
-    if (emojiEl) emojiEl.textContent = sub.emoji;
-    if (nameEl)  nameEl.textContent  = sub.name;
-  }
-
-  var activeGradeFilter = null; // null = All
-
-  function renderSubjectList() {
-    const list = $("#subjectList");
-    if (!list) return;
-    const search = $("#subjectSearch");
-    const q = search ? search.value.toLowerCase().trim() : "";
-    const filtered = SUBJECTS.filter(function (s) {
-      const gradeMatch = activeGradeFilter === null
-        ? true
-        : activeGradeFilter === "all-ages"
-          ? s.grade === null
-          : s.grade === activeGradeFilter;
-      const textMatch = !q ||
-        s.name.toLowerCase().indexOf(q) !== -1 ||
-        s.desc.toLowerCase().indexOf(q) !== -1;
-      return gradeMatch && textMatch;
-    });
-    list.innerHTML = "";
-    if (!filtered.length) {
-      list.innerHTML = '<p style="text-align:center;opacity:.5;padding:1rem">No subjects found</p>';
-      return;
-    }
-    filtered.forEach(function (sub) {
-      const card = document.createElement("div");
-      card.className = "subject-card" + (sub.id === activeSubject ? " active" : "");
-      const gradeLabel = sub.grade !== null ? "Grade " + sub.grade : "All ages";
-      card.innerHTML =
-        '<span class="subject-card-emoji">' + sub.emoji + "</span>" +
-        '<div>' +
-          '<div class="subject-card-name">' + sub.name + "</div>" +
-          '<div class="subject-card-desc">' + sub.desc + "</div>" +
-          '<div class="subject-grade">' + gradeLabel + "</div>" +
-        "</div>";
-      card.addEventListener("click", function () {
-        switchSubject(sub.id);
-        closeOverlay("#subjectOverlay");
-      });
-      list.appendChild(card);
-    });
-  }
-
-  function buildSubjectFilters() {
-    const wrap = $("#subjectFilters");
-    if (!wrap) return;
-    const filters = [
-      { label: "All", value: null },
-      { label: "K",   value: 0 },
-      { label: "1st", value: 1 },
-      { label: "2nd", value: 2 },
-      { label: "3rd", value: 3 },
-      { label: "4th", value: 4 },
-      { label: "5th", value: 5 },
-    ];
-    wrap.innerHTML = "";
-    filters.forEach(function (f) {
-      const btn = document.createElement("button");
-      btn.className = "grade-filter-btn" + (activeGradeFilter === f.value ? " active" : "");
-      btn.textContent = f.label;
-      btn.addEventListener("click", function () {
-        activeGradeFilter = f.value;
-        $$("#subjectFilters .grade-filter-btn").forEach(function (b) { b.classList.remove("active"); });
-        btn.classList.add("active");
-        renderSubjectList();
-      });
-      wrap.appendChild(btn);
-    });
-  }
-
-  function openSubjectPicker() {
-    activeGradeFilter = null;
-    const search = $("#subjectSearch");
-    if (search) {
-      search.value = "";
-      search.oninput = function () { renderSubjectList(); };
-    }
-    buildSubjectFilters();
-    renderSubjectList();
-    openOverlay("#subjectOverlay");
-    if (search && typeof search.focus === "function") setTimeout(function () { search.focus(); }, 120);
+    if (emojiEl) emojiEl.textContent = "🗺️";
+    if (nameEl)  nameEl.textContent  = "US State Capitals";
   }
 
   // ---- Screen navigation ------------------------------------
@@ -296,17 +205,7 @@
   // ============================================================
   function renderHome() {
     updateSubjectBanner();
-    // Show mastered count for active subject
-    if (activeSubject === "capitals") {
-      $("#statMastered").textContent = masteredCount(save);
-    } else {
-      const items = getActiveItems();
-      const prog = (save.subjectProgress || {})[activeSubject] || {};
-      const mastered = items.filter(function (item) {
-        return masteryLevel((prog[item.id] || {}).correct || 0) === 3;
-      }).length;
-      $("#statMastered").textContent = mastered + " / " + items.length;
-    }
+    $("#statMastered").textContent = masteredCount(save);
     $("#statCoins").textContent = save.coins;
     $("#statAnimals").textContent = uniqueAnimalCount(save);
     renderShop();
@@ -632,23 +531,12 @@
   function openPicker(mode) {
     pickerMode = mode;
     selected = new Set();
-    if (activeSubject === "capitals") {
-      $("#pickerTitle").textContent = mode === "learn"
-        ? "Pick states to learn 📚"
-        : mode === "test"
-        ? "Pick states to test 📝"
-        : "Pick states to quiz 🎯";
-      $("#pickAll").textContent = "✅ Select All 50";
-    } else {
-      const sub = SUBJECTS.find(function (s) { return s.id === activeSubject; });
-      const subName = sub ? sub.name : "topics";
-      $("#pickerTitle").textContent = mode === "learn"
-        ? "Pick " + subName + " to learn 📚"
-        : mode === "test"
-        ? "Pick " + subName + " to test 📝"
-        : "Pick topics to quiz 🎯";
-      $("#pickAll").textContent = "✅ Select All";
-    }
+    $("#pickerTitle").textContent = mode === "learn"
+      ? "Pick states to learn 📚"
+      : mode === "test"
+      ? "Pick states to test 📝"
+      : "Pick states to quiz 🎯";
+    $("#pickAll").textContent = "✅ Select All 50";
     buildPickerRegions();
     updatePickCount();
     show("picker");
@@ -658,92 +546,47 @@
     const wrap = $("#pickerRegions");
     wrap.innerHTML = "";
 
-    if (activeSubject === "capitals") {
-      // Original capitals picker: chip-based with state names
-      REGIONS.forEach(function (region) {
-        const block = document.createElement("div");
-        block.className = "region-block neo panel";
-        const states = statesInRegion(region);
+    REGIONS.forEach(function (region) {
+      const block = document.createElement("div");
+      block.className = "region-block neo panel";
+      const states = statesInRegion(region);
 
-        const head = document.createElement("h3");
-        head.innerHTML = REGION_EMOJI[region] + " " + region +
-          ' <span class="region-toggle" data-region="' + region + '">Select region</span>';
-        block.appendChild(head);
+      const head = document.createElement("h3");
+      head.innerHTML = REGION_EMOJI[region] + " " + region +
+        ' <span class="region-toggle" data-region="' + region + '">Select region</span>';
+      block.appendChild(head);
 
-        const grid = document.createElement("div");
-        grid.className = "chip-grid";
-        states.forEach(function (s) {
-          const chip = document.createElement("div");
-          chip.className = "chip neo";
-          chip.style.position = "relative";
-          chip.dataset.abbr = s.abbr;
-          const p = save.progress[s.abbr];
-          const star = p && p.mastered ? '<span class="star">⭐</span>' : "";
-          chip.innerHTML = star + s.state + "<small>" + s.abbr + "</small>";
-          chip.addEventListener("click", function () { toggleChip(s.abbr, chip); });
-          grid.appendChild(chip);
-        });
-        block.appendChild(grid);
-        wrap.appendChild(block);
+      const grid = document.createElement("div");
+      grid.className = "chip-grid";
+      states.forEach(function (s) {
+        const chip = document.createElement("div");
+        chip.className = "chip neo";
+        chip.style.position = "relative";
+        chip.dataset.abbr = s.abbr;
+        const p = save.progress[s.abbr];
+        const star = p && p.mastered ? '<span class="star">⭐</span>' : "";
+        chip.innerHTML = star + s.state + "<small>" + s.abbr + "</small>";
+        chip.addEventListener("click", function () { toggleChip(s.abbr, chip); });
+        grid.appendChild(chip);
       });
+      block.appendChild(grid);
+      wrap.appendChild(block);
+    });
 
-      // "Select region" quick buttons.
-      $$(".region-toggle").forEach(function (btn) {
-        btn.addEventListener("click", function (e) {
-          e.stopPropagation();
-          const region = btn.dataset.region;
-          const abbrs = statesInRegion(region).map(function (s) { return s.abbr; });
-          const allOn = abbrs.every(function (a) { return selected.has(a); });
-          abbrs.forEach(function (a) {
-            if (allOn) selected.delete(a); else selected.add(a);
-          });
-          syncChips();
-          updatePickCount();
+    // "Select region" quick buttons.
+    $$(".region-toggle").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        const region = btn.dataset.region;
+        const abbrs = statesInRegion(region).map(function (s) { return s.abbr; });
+        const allOn = abbrs.every(function (a) { return selected.has(a); });
+        abbrs.forEach(function (a) {
+          if (allOn) selected.delete(a); else selected.add(a);
         });
+        syncChips();
+        updatePickCount();
       });
-    } else {
-      // Non-capitals: show one card per group (not per item — too many items)
-      const allItems = getActiveItems();
-      const groups = getSubjectGroups(activeSubject);
-      const progMap = (save.subjectProgress || {})[activeSubject] || {};
-
-      groups.forEach(function (group) {
-        const groupItems = allItems.filter(function (item) { return item.group === group; });
-        const totalCorrect = groupItems.reduce(function (sum, item) {
-          return sum + ((progMap[item.id] || {}).correct || 0);
-        }, 0);
-        const avgCorrect = totalCorrect / groupItems.length;
-        const lvl = masteryLevel(avgCorrect);
-        const mastered = groupItems.filter(function (item) {
-          return masteryLevel((progMap[item.id] || {}).correct || 0) === 3;
-        }).length;
-
-        const card = document.createElement("div");
-        card.className = "group-picker-card neo";
-        card.dataset.group = group;
-        card.innerHTML =
-          '<div class="gpc-left">' +
-            '<div class="gpc-name">' + group + '</div>' +
-            '<div class="gpc-meta">' + groupItems.length + ' items &bull; ' + mastered + ' mastered ' + MASTERY_EMOJI[lvl] + '</div>' +
-          '</div>' +
-          '<div class="gpc-check">✓</div>';
-
-        card.addEventListener("click", function () {
-          const allOn = groupItems.every(function (i) { return selected.has(i.id); });
-          groupItems.forEach(function (item) {
-            if (allOn) selected.delete(item.id); else selected.add(item.id);
-          });
-          card.classList.toggle("selected", !allOn);
-          pop(card);
-          updatePickCount();
-        });
-
-        const allSel = groupItems.every(function (i) { return selected.has(i.id); });
-        if (allSel) card.classList.add("selected");
-
-        wrap.appendChild(card);
-      });
-    }
+    });
   }
 
   function toggleChip(abbr, chip) {
@@ -757,30 +600,10 @@
     $$(".chip").forEach((chip) => {
       chip.classList.toggle("selected", selected.has(chip.dataset.abbr));
     });
-    // Also sync group-picker-cards (non-capitals picker)
-    const allItems = getActiveItems();
-    $$(".group-picker-card").forEach(function (card) {
-      const group = card.dataset.group;
-      const groupItems = allItems.filter(function (i) { return i.group === group; });
-      const allSel = groupItems.length > 0 && groupItems.every(function (i) { return selected.has(i.id); });
-      card.classList.toggle("selected", allSel);
-    });
   }
 
   function updatePickCount() {
-    if (activeSubject === "capitals") {
-      $("#pickCount").textContent = selected.size + " picked";
-    } else {
-      // Show groups selected, not individual item count
-      const allItems = getActiveItems();
-      const groups = getSubjectGroups(activeSubject);
-      const groupsSelected = groups.filter(function (g) {
-        const gItems = allItems.filter(function (i) { return i.group === g; });
-        return gItems.length > 0 && gItems.every(function (i) { return selected.has(i.id); });
-      });
-      const label = groupsSelected.length === 1 ? "topic" : "topics";
-      $("#pickCount").textContent = groupsSelected.length + " " + label + " picked";
-    }
+    $("#pickCount").textContent = selected.size + " picked";
   }
 
   on("#pickAll", "click", function () {
@@ -796,7 +619,7 @@
 
   on("#startFromPicker", "click", () => {
     if (selected.size === 0) {
-      toast(activeSubject === "capitals" ? "Pick at least one state first! 👆" : "Pick at least one topic first! 👆");
+      toast("Pick at least one state first! 👆");
       return;
     }
     if (pickerMode === "learn") startLearn();
@@ -825,23 +648,12 @@
     cardFlipped = false;
     const card = $("#flashCard");
 
-    let frontText, backText, tagHTML;
-    if (activeSubject === "capitals") {
-      const s = STATES.find(function (st) { return st.abbr === id; });
-      if (!s) return;
-      frontText = s.state;
-      backText = s.capital;
-      tagHTML = '<div class="region-tag">' + REGION_EMOJI[s.region] + " " + s.region + " region</div>";
-      // Mark as seen. Studying earns no coins — it just records you looked.
-      stateProgress(save, s.abbr).seen = true;
-      persist(save);
-    } else {
-      const item = getActiveItems().find(function (i) { return i.id === id; });
-      if (!item) return;
-      frontText = item.question;
-      backText = item.answer;
-      tagHTML = '<div class="region-tag">📂 ' + item.group + "</div>";
-    }
+    const s = STATES.find(function (st) { return st.abbr === id; });
+    if (!s) return;
+    const frontText = s.state;
+    const tagHTML = '<div class="region-tag">' + REGION_EMOJI[s.region] + " " + s.region + " region</div>";
+    stateProgress(save, s.abbr).seen = true;
+    persist(save);
 
     card.innerHTML =
       tagHTML +
@@ -861,26 +673,14 @@
     const card = $("#flashCard");
     cardFlipped = !cardFlipped;
     if (cardFlipped) {
-      let frontText, backText;
-      if (activeSubject === "capitals") {
-        const s = STATES.find(function (st) { return st.abbr === id; });
-        if (!s) return;
-        frontText = s.state;
-        backText = s.capital;
-        card.innerHTML =
-          '<div class="state-name">' + frontText + "</div>" +
-          '<div class="capital-name">🏛️ ' + backText + "</div>" +
-          '<div class="tap-hint">The capital of ' + frontText + " is " + backText + ".</div>";
-      } else {
-        const item = getActiveItems().find(function (i) { return i.id === id; });
-        if (!item) return;
-        frontText = item.question;
-        backText = item.answer;
-        card.innerHTML =
-          '<div class="state-name">' + frontText + "</div>" +
-          '<div class="capital-name">✅ ' + backText + "</div>" +
-          '<div class="tap-hint">The answer is: ' + backText + ".</div>";
-      }
+      const s = STATES.find(function (st) { return st.abbr === id; });
+      if (!s) return;
+      const frontText = s.state;
+      const backText = s.capital;
+      card.innerHTML =
+        '<div class="state-name">' + frontText + "</div>" +
+        '<div class="capital-name">🏛️ ' + backText + "</div>" +
+        '<div class="tap-hint">The capital of ' + frontText + " is " + backText + ".</div>";
     } else {
       renderCard();
       return;
@@ -949,10 +749,7 @@
   function openQuizModePicker() {
     const grid = $("#qmodeGrid");
     grid.innerHTML = "";
-    const modes = activeSubject === "capitals"
-      ? QUIZ_MODES
-      : QUIZ_MODES.filter(function (m) { return m.id !== "reverse"; });
-    modes.forEach(function (m) {
+    QUIZ_MODES.forEach(function (m) {
       const el = document.createElement("div");
       el.className = "qmode neo";
       el.innerHTML = '<span class="big-emoji">' + m.emoji + "</span><h3>" + m.name + "</h3><small>" + m.desc + "</small>";
@@ -974,14 +771,10 @@
 
   // Weighted random pick — items with lower mastery appear more often.
   function weightedSample(ids, count) {
-    const progMap = activeSubject === "capitals"
-      ? save.progress
-      : ((save.subjectProgress || {})[activeSubject] || {});
+    const progMap = save.progress;
     const weighted = [];
     ids.forEach(function (id) {
-      const correct = activeSubject === "capitals"
-        ? ((progMap[id] || {}).correct || 0)
-        : ((progMap[id] || {}).correct || 0);
+      const correct = (progMap[id] || {}).correct || 0;
       const lvl = masteryLevel(correct);
       // Weight: mastered=1, proficient=2, familiar=3, not started=4
       const w = [4, 3, 2, 1][lvl] || 1;
@@ -1002,26 +795,7 @@
 
   function startQuiz(abbrs) {
     quizAbbrs = abbrs;
-    // For non-capitals subjects cap at 20 with stratified weighted sampling
-    let list = abbrs.slice();
-    if (activeSubject !== "capitals" && list.length > 20) {
-      const allItems = getActiveItems();
-      const groups = getSubjectGroups(activeSubject);
-      const selectedGroups = groups.filter(function (g) {
-        return allItems.some(function (i) { return i.group === g && abbrs.indexOf(i.id) >= 0; });
-      });
-      const perGroup = Math.max(1, Math.floor(20 / selectedGroups.length));
-      list = [];
-      selectedGroups.forEach(function (g) {
-        const gIds = allItems.filter(function (i) { return i.group === g && abbrs.indexOf(i.id) >= 0; })
-          .map(function (i) { return i.id; });
-        list = list.concat(weightedSample(gIds, perGroup));
-      });
-    } else if (activeSubject !== "capitals") {
-      // Even within a small selection, prefer unmastered items
-      list = weightedSample(abbrs, Math.min(abbrs.length, 20));
-    }
-    quizList = shuffle(list);
+    quizList = shuffle(abbrs.slice());
     quizIdx = 0;
     quizScore = 0;
     streak = 0;
@@ -1058,11 +832,6 @@
   function resumePausedQuiz(id) {
     const entry = save.pausedQuizzes.find((q) => q.id === id);
     if (!entry) return;
-    // Restore the subject that was active when the quiz was saved.
-    if (entry.subjectId) {
-      activeSubject = entry.subjectId;
-      save.currentSubject = entry.subjectId;
-    }
     quizMode = entry.quizMode;
     quizList = entry.order.slice();
     quizAbbrs = entry.order.slice();
@@ -1085,51 +854,9 @@
   }
 
   function getWrongAnswers(correctAnswer, itemId, count) {
-    if (activeSubject === "capitals") {
-      // Pick from other states' capitals (or state names for reverse mode)
-      const pool = STATES
-        .map(function (s) { return quizMode === "reverse" ? s.state : s.capital; })
-        .filter(function (v) { return v !== correctAnswer; });
-      return shuffle(pool).slice(0, count);
-    }
-    if (activeSubject === "grade1_math" || activeSubject === "kinder_math") {
-      const num = parseInt(correctAnswer, 10);
-      if (!isNaN(num)) {
-        const candidates = [];
-        for (let d = -4; d <= 4; d++) {
-          if (d !== 0) {
-            const v = num + d;
-            if (v >= 0 && String(v) !== correctAnswer) candidates.push(String(v));
-          }
-        }
-        return shuffle(candidates).slice(0, count);
-      }
-      // Non-numeric (shape names, number words)
-      const shapePool = ["circle","triangle","square","rectangle","oval","diamond","pentagon","hexagon"];
-      const wordPool = ["zero","one","two","three","four","five","six","seven","eight","nine","ten"];
-      const base = wordPool.indexOf(correctAnswer) >= 0 ? wordPool : shapePool;
-      return shuffle(base.filter(function (v) { return v !== correctAnswer; })).slice(0, count);
-    }
-    if (activeSubject === "kinder_reading") {
-      if (correctAnswer.length === 1) {
-        const isUpper = correctAnswer === correctAnswer.toUpperCase();
-        const isVowel = "aeiouAEIOU".indexOf(correctAnswer) >= 0;
-        if (isVowel) {
-          const vowels = (isUpper ? "AEIOU" : "aeiou").split("").filter(function (l) { return l !== correctAnswer; });
-          return shuffle(vowels).slice(0, count);
-        }
-        const alphabet = (isUpper ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ" : "abcdefghijklmnopqrstuvwxyz").split("");
-        return shuffle(alphabet.filter(function (l) { return l !== correctAnswer; })).slice(0, count);
-      }
-    }
-    // Generic: pick other items' answers
-    const allItems = getActiveItems();
-    const pool = [];
-    allItems.forEach(function (item) {
-      if (item.id !== itemId && item.answer !== correctAnswer && pool.indexOf(item.answer) === -1) {
-        pool.push(item.answer);
-      }
-    });
+    const pool = STATES
+      .map(function (s) { return quizMode === "reverse" ? s.state : s.capital; })
+      .filter(function (v) { return v !== correctAnswer; });
     return shuffle(pool).slice(0, count);
   }
 
@@ -1146,19 +873,14 @@
 
     let questionText, correctAnswer;
 
-    if (activeSubject === "capitals") {
-      const s = STATES.find(function (st) { return st.abbr === id; });
-      if (quizMode === "reverse") {
-        questionText = '<p class="muted">Which state has this capital?</p><div class="q-state">🏛️ ' + s.capital + "</div>";
-        correctAnswer = s.state;
-      } else {
-        questionText = '<p class="muted">What is the capital of…</p><div class="q-state">' + REGION_EMOJI[s.region] + " " + s.state + "</div>";
-        correctAnswer = s.capital;
-      }
+    const s = STATES.find(function (st) { return st.abbr === id; });
+    if (!s) return;
+    if (quizMode === "reverse") {
+      questionText = '<p class="muted">Which state has this capital?</p><div class="q-state">🏛️ ' + s.capital + "</div>";
+      correctAnswer = s.state;
     } else {
-      const item = getActiveItems().find(function (i) { return i.id === id; });
-      questionText = '<p class="muted">' + item.question + "</p>";
-      correctAnswer = item.answer;
+      questionText = '<p class="muted">What is the capital of…</p><div class="q-state">' + REGION_EMOJI[s.region] + " " + s.state + "</div>";
+      correctAnswer = s.capital;
     }
 
     // "type" mode is always typed. Test mode mixes it up: each question is
@@ -1216,12 +938,7 @@
 
   function handleAnswer(btn, isCorrect, correct, typeInput) {
     const id = quizList[quizIdx];
-    let p;
-    if (activeSubject === "capitals") {
-      p = stateProgress(save, id);
-    } else {
-      p = getItemProgress(save, activeSubject, id);
-    }
+    const p = stateProgress(save, id);
     p.attempts++;
 
     // Lock further clicks for this question.
@@ -1236,13 +953,12 @@
       } else {
         playSFX("correct");
       }
-      if (activeSubject === "capitals") {
-        // One-time coin rewards — replaying earns nothing here.
-        claimMilestone(p, "correctRewarded", COIN_FIRST_RIGHT);
-        // Mastered = answered correctly at least twice.
-        if (p.correct >= 2 && !p.mastered) p.mastered = true;
-        if (p.mastered) claimMilestone(p, "masterRewarded", COIN_MASTER);
-      }
+      // One-time coin rewards — replaying earns nothing here.
+      claimMilestone(p, "correctRewarded", COIN_FIRST_RIGHT);
+      // Mastered = answered correctly at least twice.
+      if (p.correct >= 2 && !p.mastered) p.mastered = true;
+      if (p.mastered) claimMilestone(p, "masterRewarded", COIN_MASTER);
+
       if (streak > save.bestStreak) save.bestStreak = streak;
       if (btn.classList) { btn.classList.remove("dim"); btn.classList.add("correct"); }
       if (typeInput) typeInput.classList.add("correct");
@@ -1330,9 +1046,7 @@
       ? '<p>🪙 You earned <strong>' + earned + " coins</strong>! Spend them on animal packs. 🎁</p>"
       : '<p class="muted">No new coins this time. You earn coins the first time you get a state right — and more when you master it. Keep going! 🪙</p>';
 
-    const masteredLine = activeSubject === "capitals"
-      ? "States mastered: " + mastered + " / 50"
-      : "";
+    const masteredLine = "States mastered: " + mastered + " / 50";
     wrap.innerHTML =
       '<div class="result-emoji">' + emoji + "</div>" +
       "<h2>" + headline + "</h2>" +
@@ -2087,13 +1801,6 @@
   on("#goQuiz", "keydown", function (e) { if (e.key === "Enter") openPicker("quiz"); });
   on("#goTest", "click", function () { openPicker("test"); });
   on("#goTest", "keydown", function (e) { if (e.key === "Enter") openPicker("test"); });
-
-  const subjectBannerEl = $("#subjectBanner");
-  if (subjectBannerEl) {
-    subjectBannerEl.addEventListener("click", openSubjectPicker);
-    subjectBannerEl.addEventListener("keydown", function (e) { if (e.key === "Enter") openSubjectPicker(); });
-  }
-  on("#closeSubject", "click", function () { closeOverlay("#subjectOverlay"); });
 
   function boot() {
     applyTheme(save.theme || "auto");

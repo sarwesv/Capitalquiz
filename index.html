@@ -27,7 +27,7 @@
         <span class="logo">🧠</span>
         <div>
           <h1>ProdigyMind</h1>
-          <small>Learn anything!</small>
+          <small>US State Capitals</small>
         </div>
       </div>
       <div class="user-auth-wrap" id="userAuthWrap">
@@ -49,13 +49,12 @@
     <!-- ===== HOME screen ===== -->
     <main id="screen-home" class="screen">
       <!-- Subject banner -->
-      <div class="subject-banner neo" id="subjectBanner" role="button" tabindex="0" aria-label="Change subject">
+      <div class="subject-banner neo" id="subjectBanner" style="cursor:default;">
         <span id="subjectEmoji" class="subject-emoji">🗺️</span>
         <div class="subject-banner-text">
-          <div id="subjectName" class="subject-name">State Capitals</div>
-          <div class="muted" style="font-size:0.8rem;">Tap to change subject</div>
+          <div id="subjectName" class="subject-name">US State Capitals</div>
+          <div class="muted" style="font-size:0.8rem;">Learn & master all 50 state capitals</div>
         </div>
-        <span class="subject-caret">›</span>
       </div>
       <div class="mode-grid">
         <div class="mode-card neo" id="goLearn" role="button" tabindex="0">
@@ -347,18 +346,6 @@
 
   <!-- ===== Tutorial coach-mark layer ===== -->
   <div id="coachLayer" class="coach-overlay hidden"></div>
-
-  <!-- ===== Subject picker modal ===== -->
-  <div id="subjectOverlay" class="overlay hidden">
-    <div class="modal neo">
-      <h2>📚 Choose a Subject</h2>
-      <input type="search" id="subjectSearch" class="subject-search" placeholder="Search subjects…" autocomplete="off">
-      <div id="subjectFilters" class="subject-filters"></div>
-      <div id="subjectList"></div>
-      <div class="spacer"></div>
-      <button class="btn btn-primary btn-block" id="closeSubject">Done</button>
-    </div>
-  </div>
 
   <!-- GSAP for animations (from CDN). App still works if it fails to load. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
