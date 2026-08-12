@@ -1840,6 +1840,22 @@
   on("#goTest", "click", function () { openPicker("test"); });
   on("#goTest", "keydown", function (e) { if (e.key === "Enter") openPicker("test"); });
 
+  const scrollToPanel = (sel, openKey, applyFn) => {
+    if (openKey) save[openKey] = true;
+    if (applyFn) applyFn();
+    const el = $(sel);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  on("#statCardCoins", "click", () => scrollToPanel("#shopPanel", "shopOpen", applyShopState));
+  on("#statCardCoins", "keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); scrollToPanel("#shopPanel", "shopOpen", applyShopState); } });
+
+  on("#statCardAnimals", "click", () => scrollToPanel("#zooPanel", "collectionOpen", applyCollectionState));
+  on("#statCardAnimals", "keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); scrollToPanel("#zooPanel", "collectionOpen", applyCollectionState); } });
+
+  on("#statCardMastered", "click", () => scrollToPanel("#progressPanel"));
+  on("#statCardMastered", "keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); scrollToPanel("#progressPanel"); } });
+
   function boot() {
     applyTheme(save.theme || "auto");
     applyAnswerLayout(save.answerLayout || "grid");

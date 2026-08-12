@@ -126,7 +126,35 @@
 
 /* ---- Base --------------------------------------------------- */
 * { box-sizing: border-box; }
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
 html, body { margin: 0; padding: 0; }
+body, .modal, .history-body, .resume-list, .chip-grid, .mode-grid, .shop-grid, .zoo-grid {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+/* Smooth custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--md-outline);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--md-primary);
+}
+
 body {
   font-family: "Baloo 2", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
   background: var(--bg);
