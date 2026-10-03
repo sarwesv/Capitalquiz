@@ -376,8 +376,8 @@ body.flat .btn:active { box-shadow: var(--elev-2); }
 
 .chip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 .chip {
-  padding: 8px 16px;
-  border-radius: 9999px;
+  padding: 10px 14px;
+  border-radius: 12px;
   background: transparent;
   border: 1px solid var(--md-outline-variant);
   cursor: pointer;
@@ -385,6 +385,9 @@ body.flat .btn:active { box-shadow: var(--elev-2); }
   font-size: 0.9rem;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
   transition: background .15s, border-color .15s;
   box-shadow: none;
 }
@@ -393,7 +396,7 @@ body.flat .btn:active { box-shadow: var(--elev-2); }
 .chip.selected { background: var(--md-primary-container); border-color: var(--md-primary); color: var(--md-on-primary-container); }
 .chip.selected small { color: var(--md-on-primary-container); }
 .chip.mastered::after { content: "⭐"; position: absolute; }
-.chip .star { float: right; }
+.chip .star { position: absolute; top: 8px; right: 10px; font-size: 0.8rem; }
 
 /* ---- Resume a quiz widget ----------------------------------- */
 .resume-list { display: flex; flex-direction: column; gap: 10px; }
