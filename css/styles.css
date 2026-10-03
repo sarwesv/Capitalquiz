@@ -351,6 +351,7 @@ body.flat .btn:active { box-shadow: var(--elev-2); }
 .pack-tap { font-size: 0.85rem; }
 .reveal-card {
   position: relative; padding: 26px 20px 20px; border-radius: var(--radius-lg); width: 100%;
+  contain: none; /* .neo's contain:content would clip the rarity badge that overhangs the top edge. */
   --glow: var(--md-gold);
   background: var(--md-surface);
   box-shadow: var(--elev-2), 0 0 26px -2px var(--glow), 0 0 0 3px var(--glow) inset;
