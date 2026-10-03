@@ -287,6 +287,58 @@ function masteryLevel(correct) {
   return 0;
 }
 
+// ---- Coin rewards ---------------------------------------------
+// One-time, per-state milestones. The key is the flag stored on each
+// state's progress record, the value is the coins paid. Shared by the quiz
+// (app.js) and by the cloud merge (firebase.js).
+const COIN_REWARDS = { correctRewarded: 2, masterRewarded: 5 };
+
+// ---- Typed-answer matching ------------------------------------
+// Lower-case, drop accents and punctuation, and treat "St." as "Saint".
+function normalizeAnswer(text) {
+  return String(text || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\bst\b\.?/g, "saint")
+    .replace(/[^a-z0-9 ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Edits (insert, delete, replace, or swap two neighbours) between two strings.
+function editDistance(a, b) {
+  const d = [];
+  for (let i = 0; i <= a.length; i++) {
+    d[i] = [i];
+    for (let j = 1; j <= b.length; j++) d[i][j] = i === 0 ? j : 0;
+  }
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+      }
+    }
+  }
+  return d[a.length][b.length];
+}
+
+// Judge a typed answer: "exact", "close" (a small typo), or "wrong".
+// `pool` is every possible answer; a guess that is exactly some OTHER answer
+// is a real (wrong) answer, never a typo.
+function checkTypedAnswer(guess, answer, pool) {
+  const g = normalizeAnswer(guess);
+  const a = normalizeAnswer(answer);
+  if (!g) return "wrong";
+  if (g === a) return "exact";
+  const other = (pool || []).some(function (p) { return p !== answer && normalizeAnswer(p) === g; });
+  if (other) return "wrong";
+  // Short names must be spelled right; longer ones get a little slack.
+  const allowed = a.length >= 9 ? 2 : a.length >= 5 ? 1 : 0;
+  return editDistance(g, a) <= allowed ? "close" : "wrong";
+}
+
 /* ---- Subjects registry ------------------------------------- */
 const SUBJECTS = [
   { id: "capitals", name: "State Capitals", emoji: "🗺️", grade: null, desc: "All 50 US state capitals" }
@@ -319,4 +371,6 @@ if (typeof window !== "undefined") {
   window.getSubjectItems = getSubjectItems;
   window.getSubjectGroups = getSubjectGroups;
   window.rollFromPack = rollFromPack;
+  window.COIN_REWARDS = COIN_REWARDS;
+  window.checkTypedAnswer = checkTypedAnswer;
 }

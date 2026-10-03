@@ -15,6 +15,7 @@ function defaultSave() {
     // Per-state mastery. Each entry: { seen, correct, attempts, mastered }
     progress: {},
     coins: 0,                  // spendable currency earned from lessons/quizzes.
+    modifiedAt: 0,             // ms timestamp of the last change; the cloud merge uses it to pick the newer coins/collection.
     collection: {},            // { animalId: count } — duplicates allowed!
     quizHistory: [],           // [{ date, score, total }] for the chart.
     bestStreak: 0,             // longest correct streak ever.
@@ -66,7 +67,10 @@ function loadSave() {
 }
 
 // Write the whole save back to disk (and trigger cloud sync if authenticated).
-function persist(save) {
+// `opts.keepStamp` saves without touching modifiedAt (used when we are only
+// storing the result of a cloud merge, not a change the player made).
+function persist(save, opts) {
+  if (!(opts && opts.keepStamp)) save.modifiedAt = Date.now();
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(save));
   } catch (e) {

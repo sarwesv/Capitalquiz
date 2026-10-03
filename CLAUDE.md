@@ -73,6 +73,17 @@ Type It) selected from the `qmode` screen. "Test" is a fifth separate mode
 (`quizMode = "test"`) that mixes multiple-choice and typed questions — it is handled
 by the same quiz flow but with its own question-rendering branch.
 
+**Cloud sync merge:** `mergeSaves` (`firebase.js`) combines the local and cloud saves.
+Per-state progress only grows, so it is combined (max / OR) and the one-time reward flags
+(`COIN_REWARDS` in `data.js`) must always survive. Coins and the animal collection go up
+*and down*, so they are taken from whichever copy has the newer `modifiedAt` (stamped by
+`persist`) — never "keep the bigger number", which hands back spent coins and sold animals.
+Pass `{ keepStamp: true }` to `persist` when saving a merge result rather than a player change.
+
+**Typed answers** go through `checkTypedAnswer` (`data.js`): case, spacing, punctuation and
+"St."/"Saint" are ignored and small typos are accepted, but an exact match for a *different*
+state/capital is always wrong.
+
 **Paused quizzes:** mid-quiz exits serialize the current quiz state into
 `save.pausedQuizzes` (keyed by a random `id`). Resuming restores `quizList`,
 `quizIdx`, `score`, `streak`, `sessionCoins`, and elapsed time.

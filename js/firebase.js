@@ -180,6 +180,8 @@ function listenToCloudSave(uid) {
   }
   const ref = doc(db, "users", uid);
   unsubscribeFirestore = onSnapshot(ref, (snap) => {
+    // Our own write coming straight back: nothing new to merge.
+    if (snap.metadata.hasPendingWrites) return;
     if (snap.exists()) {
       setSyncStatus("synced", "Cloud synced");
       const event = new CustomEvent("firebaseCloudSaveReceived", { detail: snap.data() });
@@ -191,34 +193,53 @@ function listenToCloudSave(uid) {
   });
 }
 
+// When the save last changed. Older cloud copies only have `updatedAt`.
+function savedAtMs(save) {
+  return save.modifiedAt || Date.parse(save.updatedAt) || 0;
+}
+
 export function mergeSaves(localSave, cloudSave) {
   if (!cloudSave) return { ...localSave };
   if (!localSave) return { ...cloudSave };
 
   const merged = { ...cloudSave, ...localSave };
-
-  merged.coins = Math.max(localSave.coins || 0, cloudSave.coins || 0);
+  merged.modifiedAt = Math.max(savedAtMs(localSave), savedAtMs(cloudSave));
   merged.bestStreak = Math.max(localSave.bestStreak || 0, cloudSave.bestStreak || 0);
 
-  merged.collection = { ...(cloudSave.collection || {}) };
-  if (localSave.collection) {
-    for (const [id, count] of Object.entries(localSave.collection)) {
-      merged.collection[id] = Math.max(merged.collection[id] || 0, count || 0);
-    }
-  }
+  // Coins and animals go up AND down (buying, selling), so "keep the bigger
+  // number" would hand back spent coins and sold animals whenever an older
+  // copy arrives. Take both from whichever copy changed most recently.
+  const localIsNewer = savedAtMs(localSave) >= savedAtMs(cloudSave);
+  const newer = localIsNewer ? localSave : cloudSave;
+  const older = localIsNewer ? cloudSave : localSave;
+  merged.collection = { ...(newer.collection || {}) };
+  merged.coins = newer.coins || 0;
 
-  merged.progress = { ...(cloudSave.progress || {}) };
-  if (localSave.progress) {
-    for (const [abbr, locProg] of Object.entries(localSave.progress)) {
-      const cProg = merged.progress[abbr] || {};
-      merged.progress[abbr] = {
-        seen: locProg.seen || cProg.seen || false,
-        correct: Math.max(locProg.correct || 0, cProg.correct || 0),
-        attempts: Math.max(locProg.attempts || 0, cProg.attempts || 0),
-        mastered: locProg.mastered || cProg.mastered || false
-      };
-    }
-  }
+  // Per-state progress only ever grows, so combine both copies. The one-time
+  // reward flags must survive (they stop coins being paid twice), and a reward
+  // earned on the older copy but unknown to the newer one is added to coins.
+  const rewards = window.COIN_REWARDS || {};
+  merged.progress = {};
+  const abbrs = new Set([
+    ...Object.keys(localSave.progress || {}),
+    ...Object.keys(cloudSave.progress || {})
+  ]);
+  abbrs.forEach((abbr) => {
+    const loc = (localSave.progress || {})[abbr] || {};
+    const cloud = (cloudSave.progress || {})[abbr] || {};
+    const p = { ...cloud, ...loc };
+    p.seen = !!(loc.seen || cloud.seen);
+    p.correct = Math.max(loc.correct || 0, cloud.correct || 0);
+    p.attempts = Math.max(loc.attempts || 0, cloud.attempts || 0);
+    p.mastered = !!(loc.mastered || cloud.mastered);
+    Object.keys(rewards).forEach((flag) => {
+      p[flag] = !!(loc[flag] || cloud[flag]);
+      const inNewer = ((newer.progress || {})[abbr] || {})[flag];
+      const inOlder = ((older.progress || {})[abbr] || {})[flag];
+      if (inOlder && !inNewer) merged.coins += rewards[flag];
+    });
+    merged.progress[abbr] = p;
+  });
 
   const combinedHistory = [...(cloudSave.quizHistory || []), ...(localSave.quizHistory || [])];
   const historyMap = new Map();

@@ -69,8 +69,8 @@
   // per state, ever, then that flag stays set in the save file.
   // Learning earns NO coins on purpose — otherwise you could just flip
   // through the cards for free coins. Coins come only from quizzes.
-  const COIN_FIRST_RIGHT = 2; // first time you answer a state correctly.
-  const COIN_MASTER = 5;    // first time a state becomes mastered.
+  const COIN_FIRST_RIGHT = COIN_REWARDS.correctRewarded; // first time you answer a state correctly.
+  const COIN_MASTER = COIN_REWARDS.masterRewarded;       // first time a state becomes mastered.
   let sessionCoins = 0;     // coins earned during the current lesson/quiz.
 
   // ---- Time on task -----------------------------------------
@@ -980,10 +980,12 @@
     const answer = correctAnswer;
     const submit = function () {
       if (isAnswering) return;
-      const guess = input.value.trim().toLowerCase();
-      const ok = guess === answer.toLowerCase();
+      // Forgive capitals, "St." for "Saint", and small typos.
+      const pool = STATES.map(function (st) { return st.capital; }).concat(STATES.map(function (st) { return st.state; }));
+      const verdict = checkTypedAnswer(input.value, answer, pool);
       const fake = document.createElement("div");
-      handleAnswer(fake, ok, answer, input);
+      handleAnswer(fake, verdict !== "wrong", answer, input);
+      if (verdict === "close") toast("Close enough! It's spelled " + answer + " ✅");
     };
     on("#typeSubmit", "click", submit);
     input.addEventListener("keydown", function (e) {
@@ -1842,9 +1844,18 @@
     if (profilePill) profilePill.addEventListener("click", openAuthPage);
     if (settingsAuthBtn) settingsAuthBtn.addEventListener("click", openAuthPage);
 
+    // A save's content, ignoring the timestamps that change on every write.
+    function saveContent(s) {
+      return JSON.stringify(s, function (k, v) { return k === "modifiedAt" || k === "updatedAt" ? undefined : v; });
+    }
+
     window.addEventListener("firebaseCloudSaveReceived", (e) => {
       if (e.detail && window.FirebaseService) {
-        save = window.FirebaseService.mergeSaves(save, e.detail);
+        const merged = window.FirebaseService.mergeSaves(save, e.detail);
+        // Nothing new from the cloud — leave the live save alone.
+        if (saveContent(merged) === saveContent(save)) return;
+        save = merged;
+        persist(save, { keepStamp: true });
         renderHome();
       }
     });
@@ -1856,7 +1867,7 @@
           if (user) {
             const cloudSave = await window.FirebaseService.fetchCloudSave(user.uid);
             save = window.FirebaseService.mergeSaves(save, cloudSave);
-            persist(save);
+            persist(save, { keepStamp: true });
             renderHome();
           }
         }, (status, details) => {
