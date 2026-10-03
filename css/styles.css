@@ -280,8 +280,9 @@ body.flat .btn:active { box-shadow: var(--elev-2); }
 #goLearn { background: linear-gradient(145deg, #6d8cff, var(--accent)); }
 #goQuiz  { background: linear-gradient(145deg, #43d99a, var(--accent-2)); }
 #goTest  { background: linear-gradient(145deg, #b988ff, #8b5cf6); }
-#goLearn h2, #goQuiz h2, #goTest h2 { color: #fff; }
-#goLearn p, #goQuiz p, #goTest p { color: rgba(255, 255, 255, 0.92); }
+#goGames { background: linear-gradient(145deg, #ffb35c, #f97316); }
+#goLearn h2, #goQuiz h2, #goTest h2, #goGames h2 { color: #fff; }
+#goLearn p, #goQuiz p, #goTest p, #goGames p { color: rgba(255, 255, 255, 0.92); }
 
 /* ---- Progress panel + chart --------------------------------- */
 .panel { padding: 20px; margin-bottom: 18px; }
@@ -504,6 +505,37 @@ body.answers-grid .answer {
 .qmode .big-emoji { font-size: 2.4rem; display: block; margin-bottom: 6px; }
 .qmode h3 { color: var(--md-primary); }
 .qmode small { color: var(--text-soft); }
+
+/* ---- Test grade ---------------------------------------------- */
+.grade-card {
+  display: inline-flex; align-items: center; gap: 16px; padding: 12px 22px 12px 14px;
+  margin: 6px auto 4px; border-radius: var(--radius-lg);
+}
+.grade-letter {
+  min-width: 76px; height: 76px; padding: 0 10px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 2.2rem; font-weight: 800; color: #fff; background: var(--grade, #6b7280);
+}
+.grade-meta { text-align: left; display: flex; flex-direction: column; }
+.grade-meta strong { font-size: 1.6rem; color: var(--text); line-height: 1.1; }
+.grade-meta span { font-size: 0.8rem; color: var(--text-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+.grade-A { --grade: #1f9d55; } .grade-B { --grade: #3b6fe0; } .grade-C { --grade: #c98a12; }
+.grade-D { --grade: #d9691c; } .grade-F { --grade: #d64545; }
+.grade-scale { font-size: 0.78rem; margin-top: 6px; }
+
+/* ---- Mini games --------------------------------------------- */
+.coin-meter { margin-top: 12px; }
+.coin-meter-row { display: flex; justify-content: space-between; gap: 12px; font-weight: 700; margin-bottom: 8px; }
+.coin-meter .progress-bar { margin: 0; }
+.mem-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+.mem-card {
+  min-height: 78px; padding: 8px; font-size: 0.95rem; font-weight: 800; line-height: 1.15;
+  display: flex; align-items: center; justify-content: center; text-align: center; word-break: break-word;
+}
+.mem-card.up.kind-state { background: var(--md-primary-container); color: #fff; }
+.mem-card.up.kind-capital { background: var(--md-secondary); color: #fff; }
+.mem-card.done { opacity: 0.55; box-shadow: none; }
+.mem-card img.emoji { width: 1.8em; height: 1.8em; }
+.game-score { margin-top: 14px; }
 
 /* ---- Results / reward screen -------------------------------- */
 .result-wrap { text-align: center; padding: 20px; }

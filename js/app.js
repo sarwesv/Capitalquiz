@@ -71,6 +71,9 @@
   // through the cards for free coins. Coins come only from quizzes.
   const COIN_FIRST_RIGHT = COIN_REWARDS.correctRewarded; // first time you answer a state correctly.
   const COIN_MASTER = COIN_REWARDS.masterRewarded;       // first time a state becomes mastered.
+  const COIN_PERFECT = 5;       // every answer right in a round of PERFECT_MIN+ questions...
+  const PERFECT_MIN = 5;        // ...but only if the round has a state never aced before.
+  const MINIGAME_DAILY_CAP = 15; // most coins mini games can pay in one day.
   let sessionCoins = 0;     // coins earned during the current lesson/quiz.
 
   // ---- Time on task -----------------------------------------
@@ -184,8 +187,9 @@
   }
 
   // ---- Screen navigation ------------------------------------
-  const screens = ["home", "picker", "learn", "qmode", "quiz", "results", "settings", "auth"];
+  const screens = ["home", "picker", "learn", "qmode", "quiz", "results", "settings", "auth", "games", "game"];
   function show(name) {
+    if (name !== "game") stopGame();
     screens.forEach((s) => $("#screen-" + s).classList.toggle("hidden", s !== name));
     window.scrollTo({ top: 0, behavior: "smooth" });
     const active = $("#screen-" + name);
@@ -1096,6 +1100,25 @@
     // Coins were already granted, once each, during the quiz via
     // claimMilestone(). sessionCoins is just how many landed THIS round —
     // it's 0 if you replayed states you'd already earned from.
+    // Perfect-score bonus. Anti-grind: it only pays when the round includes a
+    // state that has never been in a perfect round before, so replaying the
+    // same states for the bonus earns nothing.
+    let perfectNote = "";
+    if (perfect) {
+      if (quizList.length < PERFECT_MIN) {
+        perfectNote = '<p class="muted">Perfect! A bonus needs a round of at least ' + PERFECT_MIN + " questions.</p>";
+      } else {
+        const fresh = quizList.some(function (a) { return !stateProgress(save, a).perfectSeen; });
+        quizList.forEach(function (a) { stateProgress(save, a).perfectSeen = true; });
+        if (fresh) {
+          sessionCoins += COIN_PERFECT;
+          save.coins += COIN_PERFECT;
+          perfectNote = '<p>🏆 Perfect bonus: <strong>+' + COIN_PERFECT + " coins</strong>!</p>";
+        } else {
+          perfectNote = '<p class="muted">Perfect again! The perfect bonus is only paid when a round has states you haven\'t aced before.</p>';
+        }
+      }
+    }
     const earned = sessionCoins;
 
     // Record for the chart (skip streak mode, which has no fixed total).
@@ -1118,6 +1141,18 @@
       ? '<p>🪙 You earned <strong>' + earned + " coins</strong>! Spend them on animal packs. 🎁</p>"
       : '<p class="muted">No new coins this time. You earn coins the first time you get a state right — and more when you master it. Keep going! 🪙</p>';
 
+    // Tests get a standard letter grade.
+    let gradeHTML = "";
+    if (quizMode === "test") {
+      const g = gradeFor(quizScore, total);
+      gradeHTML =
+        '<div class="grade-card neo grade-' + g.band + '">' +
+          '<div class="grade-letter">' + g.letter + "</div>" +
+          '<div class="grade-meta"><strong>' + g.percent + "%</strong><span>Test grade</span></div>" +
+        "</div>" +
+        '<p class="muted grade-scale">A 90–100 · B 80–89 · C 70–79 · D 60–69 · F below 60</p>';
+    }
+
     const masteredLine = "States mastered: " + mastered + " / 50";
     wrap.innerHTML =
       '<div class="result-emoji">' + emoji + "</div>" +
@@ -1125,6 +1160,8 @@
       (quizMode === "streak"
         ? '<div class="result-score">🔥 ' + quizScore + "</div><p>Longest streak this round!</p>"
         : '<div class="result-score">' + quizScore + " / " + total + "</div>") +
+      gradeHTML +
+      perfectNote +
       coinLine +
       '<p class="muted">You have ' + save.coins + " 🪙" + (masteredLine ? " · " + masteredLine : "") + "</p>";
 
@@ -1152,6 +1189,262 @@
     on("#playAgain", "click", () => startQuiz(quizAbbrs));
     on("#backHome", "click", () => { show("home"); renderHome(); });
   }
+
+  // ============================================================
+  // MINI GAMES — short games that pay a few coins each day
+  // ============================================================
+  // Anti-grind: mini games never touch the per-state milestones, and they
+  // can pay at most MINIGAME_DAILY_CAP coins per (local) day in total.
+  let gameTimers = [];   // timeouts/intervals of the game that is running.
+  let gameToken = 0;     // bumps on every start/stop so stale callbacks do nothing.
+
+  function stopGame() {
+    gameToken++;
+    gameTimers.forEach(function (id) { clearTimeout(id); clearInterval(id); });
+    gameTimers = [];
+  }
+  function gameLater(fn, ms) {
+    const token = gameToken;
+    const id = setTimeout(function () { if (token === gameToken) fn(); }, ms);
+    gameTimers.push(id);
+    return id;
+  }
+
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function miniGameCoinsToday() {
+    return save.miniGame && save.miniGame.day === todayKey() ? save.miniGame.coins : 0;
+  }
+  function miniGameCoinsLeft() {
+    return Math.max(0, MINIGAME_DAILY_CAP - miniGameCoinsToday());
+  }
+  // Pay out up to `want` coins, never past today's cap. Returns what was paid.
+  function awardMiniGameCoins(want) {
+    const grant = Math.min(want, miniGameCoinsLeft());
+    if (grant > 0) {
+      save.miniGame = { day: todayKey(), coins: miniGameCoinsToday() + grant };
+      save.coins += grant;
+      persist(save);
+    }
+    return grant;
+  }
+
+  const MINI_GAMES = [
+    { id: "memory", emoji: "🧠", name: "Memory Match", desc: "Flip cards to match each state with its capital.", start: startMemory },
+    { id: "speed",  emoji: "🚀", name: "Speed Round",  desc: "45 seconds. Name as many capitals as you can!", start: startSpeed },
+  ];
+
+  function renderGamesHub() {
+    const done = miniGameCoinsToday();
+    $("#gamesCap").textContent = MINIGAME_DAILY_CAP;
+    $("#gamesToday").textContent = done + " / " + MINIGAME_DAILY_CAP;
+    $("#gamesBar").style.width = Math.min(100, done / MINIGAME_DAILY_CAP * 100) + "%";
+    const grid = $("#gameGrid");
+    grid.innerHTML = "";
+    MINI_GAMES.forEach(function (g) {
+      const el = document.createElement("div");
+      el.className = "qmode neo";
+      el.setAttribute("role", "button");
+      el.setAttribute("tabindex", "0");
+      el.setAttribute("aria-label", g.name + ": " + g.desc);
+      el.dataset.game = g.id;
+      el.innerHTML = '<span class="big-emoji">' + g.emoji + "</span><h3>" + g.name + "</h3><small>" + g.desc + "</small>";
+      el.addEventListener("click", g.start);
+      el.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); g.start(); }
+      });
+      grid.appendChild(el);
+    });
+  }
+  function openGames() {
+    renderGamesHub();
+    show("games");
+  }
+
+  // Shared end-of-game screen: pays the coins and shows what happened.
+  function showGameResult(opts) {
+    const granted = awardMiniGameCoins(opts.want);
+    let coinLine;
+    if (opts.want <= 0) coinLine = '<p class="muted">No coins this time — give it another go!</p>';
+    else if (granted >= opts.want) coinLine = "<p>🪙 You earned <strong>" + granted + " coins</strong>!</p>";
+    else if (granted > 0) coinLine = "<p>🪙 You earned <strong>" + granted + " coins</strong> — that's today's mini-game limit.</p>";
+    else coinLine = '<p class="muted">You\'ve hit today\'s mini-game coin limit (' + MINIGAME_DAILY_CAP + "). Come back tomorrow for more! 🌟</p>";
+    $("#gameStatus").textContent = "🪙 " + miniGameCoinsToday() + " / " + MINIGAME_DAILY_CAP + " today";
+    const area = $("#gameArea");
+    area.innerHTML =
+      '<div class="result-wrap">' +
+        '<div class="result-emoji">' + opts.emoji + "</div>" +
+        "<h2>" + opts.title + "</h2>" +
+        '<p class="muted">' + opts.detail + "</p>" +
+        coinLine +
+        '<p class="muted">You have ' + save.coins + " 🪙</p>" +
+        '<div style="margin-top:16px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">' +
+          '<button class="btn btn-accent btn-lg" id="gameAgain">Play again 🔁</button>' +
+          '<button class="btn btn-lg" id="gameBack">All games 🎮</button>' +
+        "</div>" +
+      "</div>";
+    animIn(area);
+    on("#gameAgain", "click", opts.again);
+    on("#gameBack", "click", openGames);
+  }
+
+  // ---- Memory Match: 6 states + their capitals, find the pairs ----
+  function startMemory() {
+    stopGame();
+    show("game");
+    const PAIRS = 6;
+    const cards = [];
+    shuffle(STATES.slice()).slice(0, PAIRS).forEach(function (s) {
+      cards.push({ abbr: s.abbr, text: s.state, kind: "state" });
+      cards.push({ abbr: s.abbr, text: s.capital, kind: "capital" });
+    });
+    const deck = shuffle(cards);
+    let open = [], matched = 0, moves = 0, busy = false;
+
+    const area = $("#gameArea");
+    area.innerHTML =
+      '<p class="center muted">Match each state with its capital.</p>' +
+      '<div class="mem-grid" id="memGrid"></div>';
+    const grid = $("#memGrid");
+    const status = $("#gameStatus");
+    function updateStatus() { status.textContent = "Moves " + moves + " · Pairs " + matched + "/" + PAIRS; }
+    function paint(i) {
+      const c = deck[i], b = c.btn;
+      const shown = c.up || c.done;
+      b.textContent = shown ? c.text : "❔";
+      b.className = "mem-card btn" + (shown ? " up kind-" + c.kind : "") + (c.done ? " done" : "");
+      b.disabled = !!c.done;
+      b.setAttribute("aria-label", shown ? c.text : "Hidden card");
+    }
+    deck.forEach(function (c, i) {
+      c.btn = document.createElement("button");
+      c.btn.dataset.abbr = c.abbr;
+      c.btn.addEventListener("click", function () { flip(i); });
+      grid.appendChild(c.btn);
+      paint(i);
+    });
+    updateStatus();
+
+    function flip(i) {
+      const c = deck[i];
+      if (busy || c.up || c.done) return;
+      c.up = true;
+      paint(i);
+      open.push(i);
+      if (open.length < 2) return;
+      moves++;
+      updateStatus();
+      const a = deck[open[0]], b = deck[open[1]];
+      const ai = open[0], bi = open[1];
+      busy = true;
+      if (a.abbr === b.abbr) {
+        a.done = b.done = true;
+        matched++;
+        open = [];
+        busy = false;
+        paint(ai); paint(bi);
+        playSFX("correct");
+        updateStatus();
+        if (matched === PAIRS) gameLater(finish, 500);
+      } else {
+        gameLater(function () {
+          a.up = b.up = false;
+          open = [];
+          busy = false;
+          paint(ai); paint(bi);
+        }, 800);
+      }
+    }
+    function finish() {
+      playSFX("completed");
+      // The fewer the moves, the more coins (6 pairs can't be done in under 6).
+      const want = moves <= 8 ? 5 : moves <= 11 ? 4 : moves <= 14 ? 3 : moves <= 18 ? 2 : 1;
+      showGameResult({
+        emoji: moves <= 8 ? "🏆" : "🌟",
+        title: "All matched!",
+        detail: "You found all " + PAIRS + " pairs in " + moves + " moves.",
+        want: want,
+        again: startMemory,
+      });
+    }
+  }
+
+  // ---- Speed Round: as many capitals as you can in 45 seconds ----
+  function startSpeed() {
+    stopGame();
+    show("game");
+    const DURATION = 45000;
+    let right = 0, asked = 0, locked = false, lastAbbr = null, over = false;
+    const endAt = Date.now() + DURATION;
+
+    const area = $("#gameArea");
+    area.innerHTML =
+      '<div class="question-card neo" id="speedQ"></div>' +
+      '<div class="answer-grid" id="speedA"></div>' +
+      '<p class="center muted game-score" id="speedScore"></p>';
+
+    function updateClock() {
+      const left = Math.max(0, endAt - Date.now());
+      $("#gameStatus").textContent = "⏱️ " + Math.ceil(left / 1000) + "s";
+      return left;
+    }
+    function updateScore() { $("#speedScore").textContent = "Correct: " + right + " · Asked: " + asked; }
+
+    function nextQuestion() {
+      if (over) return;
+      locked = false;
+      let s;
+      do { s = STATES[Math.floor(Math.random() * STATES.length)]; } while (s.abbr === lastAbbr);
+      lastAbbr = s.abbr;
+      asked++;
+      updateScore();
+      $("#speedQ").innerHTML = '<p class="muted">What is the capital of…</p><div class="q-state">' + REGION_EMOJI[s.region] + " " + s.state + "</div>";
+      const grid = $("#speedA");
+      grid.innerHTML = "";
+      shuffle([s.capital].concat(wrongCapitals(s.capital, 3))).forEach(function (cap) {
+        const btn = document.createElement("button");
+        btn.className = "answer btn";
+        btn.textContent = cap;
+        btn.addEventListener("click", function () {
+          if (locked || over) return;
+          locked = true;
+          const ok = cap === s.capital;
+          if (ok) right++;
+          playSFX(ok ? "correct" : "wrong");
+          btn.classList.add(ok ? "correct" : "wrong");
+          if (!ok) $$("#speedA .answer").forEach(function (b) { if (b.textContent === s.capital) b.classList.add("correct"); });
+          updateScore();
+          gameLater(nextQuestion, ok ? 250 : 650);
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    function finish() {
+      if (over) return;
+      over = true;
+      stopGame();
+      playSFX("completed");
+      // 1 coin for every 3 right, up to 6.
+      const want = Math.min(6, Math.floor(right / 3));
+      showGameResult({
+        emoji: right >= 15 ? "🏆" : right >= 8 ? "🌟" : "💪",
+        title: "Time's up!",
+        detail: "You got " + right + " right out of " + asked + ".",
+        want: want,
+        again: startSpeed,
+      });
+    }
+
+    updateClock();
+    nextQuestion();
+    const tick = setInterval(function () { if (updateClock() <= 0) finish(); }, 200);
+    gameTimers.push(tick);
+  }
+
+  on("#exitGame", "click", openGames);
 
   // ---- Buying + opening packs -------------------------------
   function buyPack(pack) {
@@ -1899,6 +2192,8 @@
   on("#goQuiz", "keydown", function (e) { if (e.key === "Enter") openPicker("quiz"); });
   on("#goTest", "click", function () { openPicker("test"); });
   on("#goTest", "keydown", function (e) { if (e.key === "Enter") openPicker("test"); });
+  on("#goGames", "click", openGames);
+  on("#goGames", "keydown", function (e) { if (e.key === "Enter") openGames(); });
 
   const scrollToPanel = (sel, openKey, applyFn) => {
     if (openKey) save[openKey] = true;

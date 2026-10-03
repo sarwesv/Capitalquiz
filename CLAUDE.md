@@ -68,6 +68,12 @@ raw localStorage.
 **Mastery:** a state is mastered when `p.correct >= 2`. Once mastered, the
 `masterRewarded` flag fires `claimMilestone` so the coin reward fires exactly once.
 
+**Test grade:** the results screen of a Test shows a standard letter grade from `gradeFor` (`data.js`).
+
+**Mini games:** screens `games` (hub) and `game` (play area). `startMemory` / `startSpeed` are
+the games; `show()` calls `stopGame()` whenever you leave the `game` screen, and all game
+timers go through `gameLater` / `gameTimers` so a stopped game can never fire later.
+
 **Quiz vs. Test:** "Quiz" offers four game modes (Classic, Backwards, Streak Rush,
 Type It) selected from the `qmode` screen. "Test" is a fifth separate mode
 (`quizMode = "test"`) that mixes multiple-choice and typed questions — it is handled
@@ -112,10 +118,19 @@ state/capital is always wrong.
 
 ## Economy rules (don't break these)
 
-- **Coins come only from quizzes/tests**, via one-time per-state milestones
-  (`claimMilestone`): first correct answer (+2 coins) and first mastery (+5 coins).
-  Learning earns nothing and replaying already-earned states earns nothing — this is
-  deliberate anti-grind; preserve it.
+- **Coins come from quizzes/tests and capped mini games**, never from learning or from
+  replaying the same thing. The sources:
+  - **Per-state milestones** (`claimMilestone`, one time per state, ever): first correct
+    answer (+2) and first mastery (+5). Amounts live in `COIN_REWARDS` (`data.js`).
+  - **Perfect-round bonus** (+5, `COIN_PERFECT`): every answer right in a quiz/test of at
+    least `PERFECT_MIN` (5) questions, and only if the round includes a state that has
+    never been in a perfect round before (`perfectSeen` flag on each state's progress).
+    Replaying the same states for the bonus pays nothing. Streak Rush is excluded.
+  - **Mini games** (`awardMiniGameCoins`): at most `MINIGAME_DAILY_CAP` (15) coins per local
+    day in total, tracked in `save.miniGame = { day, coins }`. Mini games never touch the
+    per-state milestones or mastery.
+  Learning earns nothing — this is deliberate anti-grind; preserve it. Any new coin source
+  needs its own cap or one-time flag.
 - **Selling** animals pays `RARITIES[r].sell`, kept below pack prices so
   buying-to-sell is never profitable.
 

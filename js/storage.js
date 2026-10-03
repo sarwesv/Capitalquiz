@@ -15,6 +15,7 @@ function defaultSave() {
     // Per-state mastery. Each entry: { seen, correct, attempts, mastered }
     progress: {},
     coins: 0,                  // spendable currency earned from lessons/quizzes.
+    miniGame: { day: "", coins: 0 }, // coins earned from mini games on `day` (YYYY-MM-DD, local) — capped per day.
     modifiedAt: 0,             // ms timestamp of the last change; the cloud merge uses it to pick the newer coins/collection.
     collection: {},            // { animalId: count } — duplicates allowed!
     quizHistory: [],           // [{ date, score, total }] for the chart.

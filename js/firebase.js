@@ -214,6 +214,7 @@ export function mergeSaves(localSave, cloudSave) {
   const older = localIsNewer ? cloudSave : localSave;
   merged.collection = { ...(newer.collection || {}) };
   merged.coins = newer.coins || 0;
+  merged.miniGame = newer.miniGame || { day: "", coins: 0 };
 
   // Per-state progress only ever grows, so combine both copies. The one-time
   // reward flags must survive (they stop coins being paid twice), and a reward
@@ -232,6 +233,7 @@ export function mergeSaves(localSave, cloudSave) {
     p.correct = Math.max(loc.correct || 0, cloud.correct || 0);
     p.attempts = Math.max(loc.attempts || 0, cloud.attempts || 0);
     p.mastered = !!(loc.mastered || cloud.mastered);
+    if (loc.perfectSeen || cloud.perfectSeen) p.perfectSeen = true;
     Object.keys(rewards).forEach((flag) => {
       p[flag] = !!(loc[flag] || cloud[flag]);
       const inNewer = ((newer.progress || {})[abbr] || {})[flag];

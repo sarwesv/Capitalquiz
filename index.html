@@ -74,6 +74,11 @@
           <h2>Test</h2>
           <p>The real challenge — mixes multiple-choice <em>and</em> typing!</p>
         </div>
+        <div class="mode-card neo" id="goGames" role="button" tabindex="0">
+          <span class="big-emoji">🎮</span>
+          <h2>Mini Games</h2>
+          <p>Quick games for a few bonus coins!</p>
+        </div>
       </div>
 
       <!-- Resume paused quizzes (only shows when you have some) -->
@@ -206,6 +211,27 @@
       <div class="result-wrap" id="resultWrap"></div>
     </main>
 
+    <!-- ===== MINI GAMES hub ===== -->
+    <main id="screen-games" class="screen hidden">
+      <button class="back-link" data-go="home">← Back</button>
+      <h2>🎮 Mini Games</h2>
+      <p class="muted">Short games that pay a few coins. You can earn up to <strong id="gamesCap">15</strong> coins a day from them, so come back tomorrow!</p>
+      <div class="panel neo coin-meter">
+        <div class="coin-meter-row"><span>🪙 Mini-game coins today</span><strong id="gamesToday">0 / 15</strong></div>
+        <div class="progress-bar neo-inset"><span id="gamesBar"></span></div>
+      </div>
+      <div class="qmode-grid" id="gameGrid"></div>
+    </main>
+
+    <!-- ===== MINI GAME play screen ===== -->
+    <main id="screen-game" class="screen hidden">
+      <div class="task-head">
+        <button class="back-link" id="exitGame">← Exit game</button>
+        <span id="gameStatus" class="task-timer neo-inset"></span>
+      </div>
+      <div id="gameArea"></div>
+    </main>
+
     <!-- ===== SETTINGS screen ===== -->
     <main id="screen-settings" class="screen hidden">
       <button class="back-link" id="settingsBack">← Back to Home</button>
@@ -322,10 +348,10 @@
       <h2>❓ Help Guide</h2>
       <div class="help-step"><span class="n">1</span><div><strong>Learn</strong> flips flash cards so you can study a few states at a time. Tap a card to reveal the capital!</div></div>
       <div class="help-step"><span class="n">2</span><div><strong>Quiz</strong> lets you pick a fun game mode. Answer questions to earn 🪙 coins.</div></div>
-      <div class="help-step"><span class="n">3</span><div><strong>Test 📝</strong> is the real challenge — every question is a mix of multiple-choice <em>and</em> typing. Pick any states or all 50.</div></div>
+      <div class="help-step"><span class="n">3</span><div><strong>Test 📝</strong> is the real challenge — every question is a mix of multiple-choice <em>and</em> typing, and you get a letter grade at the end. Get every question right in a round of 5 or more for a <strong>+5 🪙 perfect bonus</strong> (paid once for new states).</div></div>
       <div class="help-step"><span class="n">4</span><div><strong>Pick states</strong> before you start. Choose a region, a few states, or tap <em>Select All 50</em>.</div></div>
       <div class="help-step"><span class="n">5</span><div>Spend coins in the <strong>Pack Shop</strong> to open animal packs 🎁 — some animals are super rare! Collect them all 🐶🦄.</div></div>
-      <div class="help-step"><span class="n">6</span><div>Your <strong>progress</strong> is saved automatically and shown on the chart.</div></div>
+      <div class="help-step"><span class="n">6</span><div>Your <strong>progress</strong> is saved automatically and shown on the chart. Try the <strong>Mini Games 🎮</strong> for a few extra coins each day.</div></div>
       <div class="help-step"><span class="n">7</span><div>Tap <strong>⚙️ Settings</strong> to change the look, theme, answer buttons, or replay this guide's arrows.</div></div>
       <p class="muted credit">Artwork: <a href="https://openmoji.org" target="_blank" rel="noopener">OpenMoji</a> by the OpenMoji contributors, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p>
       <div class="spacer"></div>

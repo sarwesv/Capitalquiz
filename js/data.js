@@ -339,6 +339,23 @@ function checkTypedAnswer(guess, answer, pool) {
   return editDistance(g, a) <= allowed ? "close" : "wrong";
 }
 
+// ---- Grading ----------------------------------------------------
+// Standard US letter grades (with + and -) for a percentage.
+const GRADE_SCALE = [
+  { min: 97, letter: "A+" }, { min: 93, letter: "A" }, { min: 90, letter: "A-" },
+  { min: 87, letter: "B+" }, { min: 83, letter: "B" }, { min: 80, letter: "B-" },
+  { min: 77, letter: "C+" }, { min: 73, letter: "C" }, { min: 70, letter: "C-" },
+  { min: 67, letter: "D+" }, { min: 63, letter: "D" }, { min: 60, letter: "D-" },
+  { min: 0,  letter: "F" },
+];
+
+// Grade a test: { percent: 0-100, letter: "B+", band: "B" }.
+function gradeFor(correct, total) {
+  const percent = total > 0 ? Math.round(correct / total * 100) : 0;
+  const row = GRADE_SCALE.find(function (g) { return percent >= g.min; });
+  return { percent: percent, letter: row.letter, band: row.letter.charAt(0) };
+}
+
 /* ---- Subjects registry ------------------------------------- */
 const SUBJECTS = [
   { id: "capitals", name: "State Capitals", emoji: "🗺️", grade: null, desc: "All 50 US state capitals" }
@@ -373,4 +390,5 @@ if (typeof window !== "undefined") {
   window.rollFromPack = rollFromPack;
   window.COIN_REWARDS = COIN_REWARDS;
   window.checkTypedAnswer = checkTypedAnswer;
+  window.gradeFor = gradeFor;
 }
