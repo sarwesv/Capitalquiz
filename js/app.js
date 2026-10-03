@@ -794,6 +794,7 @@
   let streak = 0;
   let quizAbbrs = [];
   let resumingId = null;    // id of the paused quiz we're currently playing.
+  let isAnswering = false;  // prevents double-submitting / bypassing on quick Enter keypresses.
 
   // Weighted random pick — items with lower mastery appear more often.
   function weightedSample(ids, count) {
@@ -887,6 +888,7 @@
   }
 
   function renderQuestion() {
+    isAnswering = false;
     const id = quizList[quizIdx];
     $("#quizCounter").textContent = "Question " + (quizIdx + 1) + " of " + quizList.length;
     $("#quizBar").style.width = (quizIdx / quizList.length * 100) + "%";
@@ -953,22 +955,34 @@
     input.focus();
     const answer = correctAnswer;
     const submit = function () {
+      if (isAnswering) return;
       const guess = input.value.trim().toLowerCase();
       const ok = guess === answer.toLowerCase();
       const fake = document.createElement("div");
       handleAnswer(fake, ok, answer, input);
     };
     on("#typeSubmit", "click", submit);
-    input.addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submit();
+      }
+    });
   }
 
   function handleAnswer(btn, isCorrect, correct, typeInput) {
+    if (isAnswering) return;
+    isAnswering = true;
+
     const id = quizList[quizIdx];
     const p = stateProgress(save, id);
     p.attempts++;
 
-    // Lock further clicks for this question.
+    // Lock further clicks / typing for this question.
     $$("#answerGrid .answer").forEach(function (b) { b.disabled = true; b.classList.add("dim"); });
+    if (typeInput) typeInput.disabled = true;
+    const typeSub = $("#typeSubmit");
+    if (typeSub) typeSub.disabled = true;
 
     if (isCorrect) {
       quizScore++;

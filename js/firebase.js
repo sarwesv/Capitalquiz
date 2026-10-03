@@ -7,6 +7,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import {
   getAuth,
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut,
@@ -94,11 +95,29 @@ export async function signInWithGoogle() {
   }
 
   const provider = new GoogleAuthProvider();
-  setSyncStatus("syncing", "Redirecting to Google...");
+  setSyncStatus("syncing", "Signing in with Google...");
 
   try {
-    await signInWithRedirect(auth, provider);
+    const result = await signInWithPopup(auth, provider);
+    if (result && result.user) {
+      setSyncStatus("synced", "Signed in");
+      return result.user;
+    }
   } catch (error) {
+    if (error.code === "auth/popup-blocked") {
+      console.warn("Sign-in popup was blocked by browser. Falling back to redirect...", error);
+      setSyncStatus("syncing", "Redirecting to Google...");
+      await signInWithRedirect(auth, provider);
+      return;
+    } else if (error.code === "auth/popup-closed-by-user") {
+      setSyncStatus("offline", "Sign-in cancelled");
+      return;
+    } else if (error.code === "auth/unauthorized-domain") {
+      const msg = "Domain (" + window.location.hostname + ") is not authorized in Firebase Console under Auth > Settings > Authorized domains.";
+      setSyncStatus("error", msg);
+      throw new Error(msg);
+    }
+    console.error("Google sign-in error:", error);
     setSyncStatus("error", error.message);
     throw error;
   }
