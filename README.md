@@ -15,7 +15,7 @@ A fun, rewarding way for kids and learners to master all **50 US State Capitals*
 - **📈 Progress Tracking** — Quiz scores and performance data are stored locally and plotted on an interactive progress chart.
 - **🎨 Material Design 3 System** — Styled with Google's Material Design 3 (Material You) design tokens, container surfaces, and elevation.
 - **🌗 Dark / Light Mode** — Automatic system theme detection with manual override options.
-- **📱 Fully Responsive & Offline Ready** — Built entirely with emoji graphics and operates completely offline once loaded.
+- **📱 Fully Responsive & Offline Ready** — All artwork is bundled with the app (OpenMoji), so it looks the same on every device and runs offline once loaded.
 
 ---
 
@@ -57,3 +57,7 @@ node --check js/app.js && node --check js/storage.js && node --check js/data.js
 
 - **Repository URL:** [https://github.com/sarwesv/Capitalquiz.git](https://github.com/sarwesv/Capitalquiz.git)
 - All changes are continuously committed and pushed to the `main` branch.
+
+## Credits
+
+Artwork is [OpenMoji](https://openmoji.org) by the OpenMoji contributors, licensed [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). The SVG files live in `assets/openmoji/` with the license text.

@@ -22,7 +22,7 @@ transpiler unless explicitly asked — keeping it dependency-free is a goal.
 Syntax-check JS before committing:
 
 ```bash
-node --check js/app.js && node --check js/storage.js && node --check js/data.js
+node --check js/app.js && node --check js/storage.js && node --check js/data.js && node --check js/emoji.js
 ```
 
 The only external resources are CDN-loaded at runtime:
@@ -40,11 +40,13 @@ js/data.js      Static data + pure helpers: STATES (50), REGIONS, RARITIES,
                 PACKS (animal library), and helpers like shuffle/rollFromPack.
 js/storage.js   Everything that touches localStorage. defaultSave() is the
                 schema; all persistence goes through load/persist here.
+js/emoji.js     Swaps emoji for OpenMoji SVGs from assets/openmoji/ (DOM observer).
+assets/openmoji Bundled OpenMoji artwork + LICENSE.txt (CC BY-SA 4.0).
 js/app.js       All behavior, wrapped in one IIFE. Screen nav, learn, quiz,
                 test, shop, packs, collection, time-on-task, tutorial, chart.
 ```
 
-Load order in `index.html` matters: `data.js` → `storage.js` → `app.js`.
+Load order in `index.html` matters: `data.js` → `storage.js` → `emoji.js` → `firebase-config.js` → `firebase.js` → `app.js`.
 
 ## Architecture
 
@@ -85,8 +87,14 @@ by the same quiz flow but with its own question-rendering branch.
   for yes/no dialogs.
 - **Modals:** open with `openOverlay('#overlayId')`, close with
   `closeOverlay('#overlayId')`. Each modal is a hidden `div.overlay` in `index.html`.
-- **Everything is emoji** — animals, icons, regions. There are intentionally **no
-  image files**, which keeps the app offline-capable and light.
+- **Emoji are shown as OpenMoji art.** Write plain emoji in text/HTML/data as usual;
+  `js/emoji.js` swaps each one for an SVG from `assets/openmoji/` (it watches the DOM,
+  so dynamic content works too). To use a new emoji, add its SVG to `assets/openmoji/`
+  (file name = uppercase hex code points, e.g. `1F43A.svg`, dropping `FE0F`) and add the
+  code to `AVAILABLE` in `js/emoji.js`; emoji without art just stay as text. Emoji in
+  attributes (`title`, `placeholder`), CSS `content`, or SVG `<text>` can't be swapped, so
+  avoid them (or use `EmojiArt.src(emoji)` for an `<img src>`). Keep each animal's emoji
+  unique across `PACKS`. Keep the OpenMoji credit (CC BY-SA 4.0) in Help and the README.
 - **Theme & MD3 Styling** are driven by CSS variables and root attributes (`:root[data-theme]`). Style both light and dark.
 - Match the existing plain-ES5-ish style (function declarations, `let`/`const`,
   string concatenation for templates). No new tooling.

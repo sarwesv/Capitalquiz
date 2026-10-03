@@ -170,6 +170,15 @@ h1, h2, h3 { margin: 0 0 8px; line-height: 1.15; }
 h1 { font-size: clamp(1.6rem, 5vw, 2.4rem); }
 p { line-height: 1.5; color: var(--text-soft); }
 
+/* ---- Emoji artwork (swapped in by js/emoji.js) -------------- */
+img.emoji {
+  display: inline-block; width: 1.2em; height: 1.2em; vertical-align: -0.25em;
+  object-fit: contain; user-select: none; -webkit-user-drag: none;
+}
+.animal img.emoji, .reveal-emoji img.emoji { width: 1.5em; height: 1.5em; vertical-align: middle; }
+.credit { font-size: 0.75rem; margin-top: 10px; text-align: center; }
+.credit a { color: var(--md-primary); }
+
 /* ---- MD3 surfaces ------------------------------------------ */
 /* contain:content isolates paint so the browser only repaints this card */
 .neo {
@@ -396,7 +405,6 @@ body.flat .btn:active { box-shadow: var(--elev-2); }
 .chip:hover { background: rgba(91,124,250,.08); }
 .chip.selected { background: var(--md-primary-container); border-color: var(--md-primary); color: var(--md-on-primary-container); }
 .chip.selected small { color: var(--md-on-primary-container); }
-.chip.mastered::after { content: "⭐"; position: absolute; }
 .chip .star { position: absolute; top: 8px; right: 10px; font-size: 0.8rem; }
 
 /* ---- Resume a quiz widget ----------------------------------- */

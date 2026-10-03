@@ -1732,15 +1732,20 @@
       );
     }
 
+    // Real artwork when we have it; the text-emoji picture is only a fallback.
+    function emojiSrc(emoji) {
+      return (window.EmojiArt && window.EmojiArt.src(emoji)) || emojiDataUri(emoji);
+    }
+
     function getProfileAvatarSrc(user) {
       if (save.profileAvatar) {
         // Find the animal emoji
         for (const pack of PACKS) {
           const animal = pack.pool.find((a) => a.id === save.profileAvatar);
-          if (animal) return emojiDataUri(animal.emoji);
+          if (animal) return emojiSrc(animal.emoji);
         }
       }
-      return user && user.photoURL ? user.photoURL : emojiDataUri("👤");
+      return user && user.photoURL ? user.photoURL : emojiSrc("👤");
     }
 
     function refreshProfileAvatar() {
@@ -1778,7 +1783,7 @@
       googleBtn.className = "avatar-option" + (!save.profileAvatar ? " selected" : "");
       googleBtn.title = "Google photo";
       const gImg = document.createElement("img");
-      gImg.src = user && user.photoURL ? user.photoURL : emojiDataUri("👤");
+      gImg.src = user && user.photoURL ? user.photoURL : emojiSrc("👤");
       gImg.style.cssText = "width:36px;height:36px;border-radius:50%;object-fit:cover;";
       googleBtn.appendChild(gImg);
       googleBtn.addEventListener("click", () => {
