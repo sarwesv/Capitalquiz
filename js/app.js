@@ -795,6 +795,28 @@
   let quizAbbrs = [];
   let resumingId = null;    // id of the paused quiz we're currently playing.
   let isAnswering = false;  // prevents double-submitting / bypassing on quick Enter keypresses.
+  let advanceTimer = null;  // pending move to the next question after an answer.
+  let pendingAdvance = null; // what that timer will run (nextQuestion or finishQuiz).
+
+  function scheduleAdvance(fn, delay) {
+    cancelAdvance();
+    pendingAdvance = fn;
+    advanceTimer = setTimeout(function () {
+      advanceTimer = null;
+      pendingAdvance = null;
+      fn();
+    }, delay);
+  }
+
+  // Stop a pending advance so it can't fire into a paused or new quiz.
+  // Returns the step that was pending (or null).
+  function cancelAdvance() {
+    const fn = pendingAdvance;
+    if (advanceTimer) clearTimeout(advanceTimer);
+    advanceTimer = null;
+    pendingAdvance = null;
+    return fn;
+  }
 
   // Weighted random pick — items with lower mastery appear more often.
   function weightedSample(ids, count) {
@@ -828,6 +850,7 @@
     streak = 0;
     sessionCoins = 0;
     resumingId = null;      // this is a fresh quiz, not a resumed one.
+    cancelAdvance();
     startTimer("#quizTimer");
     show("quiz");
     renderQuestion();
@@ -867,6 +890,7 @@
     streak = entry.streak || 0;
     sessionCoins = entry.sessionCoins || 0;
     resumingId = id;
+    cancelAdvance();
     // Continue the clock from the time already spent.
     startTimer("#quizTimer", entry.elapsedMs || 0);
     show("quiz");
@@ -1015,10 +1039,10 @@
 
     // Streak Rush ends the moment you miss.
     if (quizMode === "streak" && !isCorrect) {
-      setTimeout(finishQuiz, 900);
+      scheduleAdvance(finishQuiz, 900);
       return;
     }
-    setTimeout(nextQuestion, 950);
+    scheduleAdvance(nextQuestion, 950);
   }
 
   function nextQuestion() {
@@ -1032,6 +1056,8 @@
   }
 
   on("#exitQuiz", "click", () => {
+    // Freeze any pending move to the next question while the dialog is up.
+    const pending = cancelAdvance();
     gameConfirm({
       emoji: "⏸️",
       title: "Leave this quiz?",
@@ -1039,10 +1065,18 @@
       confirmText: "Leave & save",
       cancelText: "Keep going",
       onConfirm: () => {
+        // The question on screen was already answered and counted, so the
+        // saved quiz must start at the next one, or it'd be counted twice.
+        if (pending === finishQuiz || (pending && quizIdx >= quizList.length - 1)) {
+          finishQuiz(); // that answer ended the quiz — nothing left to resume.
+          return;
+        }
+        if (pending) quizIdx++;
         savePausedQuiz();
         stopTimer();
         show("home"); renderHome();
       },
+      onCancel: () => { if (pending) pending(); },
     });
   });
 
@@ -1588,7 +1622,7 @@
     o.querySelector('[data-cf="cancel"]').addEventListener("click", () => { close(); if (opts.onCancel) opts.onCancel(); });
     o.querySelector('[data-cf="ok"]').addEventListener("click", () => { close(); if (opts.onConfirm) opts.onConfirm(); });
     // Tapping the dark backdrop cancels.
-    o.addEventListener("click", (e) => { if (e.target === o) close(); });
+    o.addEventListener("click", (e) => { if (e.target === o) { close(); if (opts.onCancel) opts.onCancel(); } });
   }
 
   // A gentle confirm before leaving a lesson/quiz in progress.
