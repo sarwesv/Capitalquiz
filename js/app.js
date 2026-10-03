@@ -974,11 +974,7 @@
       quizScore++;
       streak++;
       p.correct++;
-      if (streak >= 3 && streak % 3 === 0) {
-        playSFX("streak");
-      } else {
-        playSFX("correct");
-      }
+      playSFX("correct");
       // One-time coin rewards — replaying earns nothing here.
       claimMilestone(p, "correctRewarded", COIN_FIRST_RIGHT);
       // Mastered = answered correctly at least twice.
