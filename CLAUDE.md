@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 **Capitals Quest** — a static, single-page web app that helps learners master
-US state capitals. It runs entirely in the browser with **no build step, no
+the capitals of the 50 US states and the 5 inhabited US territories. It runs entirely in the browser with **no build step, no
 framework, and no backend**. It's designed to be hosted on GitHub Pages.
 
 ## Running it
@@ -36,7 +36,8 @@ The only external resources are CDN-loaded at runtime:
 index.html      All markup: screens (home, picker, learn, qmode, quiz, results)
                 and modals (settings, help, animal, pack, confirm, coachLayer).
 css/styles.css  MD3 design tokens, theme variables, layout, component styles, animations.
-js/data.js      Static data + pure helpers: STATES (50), REGIONS, RARITIES,
+js/data.js      Static data + pure helpers: STATES (50 states + 5 territories),
+                REGIONS (incl. "Territories"), RARITIES,
                 PACKS (animal library), and helpers like shuffle/rollFromPack.
 js/storage.js   Everything that touches localStorage. defaultSave() is the
                 schema; all persistence goes through load/persist here.
@@ -64,6 +65,11 @@ Key quiz variables: `quizList` (ordered state abbrs), `quizIdx`, `quizScore`,
 `defaultSave()` in `storage.js`; `loadSave()` merges stored data over the defaults
 (forward-compatible). Always add new fields to `defaultSave()` rather than reading
 raw localStorage.
+
+**Territories** are ordinary `STATES` entries with `region: "Territories"` (AS, GU, MP, PR, VI),
+so progress, mastery, coins and every mode work unchanged. Wrong answers come from
+`distractorPool`, which only mixes territories with territories and states with states.
+Never hard-code "50" — use `STATES.length`.
 
 **Mastery:** a state is mastered when `p.correct >= 2`. Once mastered, the
 `masterRewarded` flag fires `claimMilestone` so the coin reward fires exactly once.

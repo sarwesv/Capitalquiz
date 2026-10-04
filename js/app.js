@@ -183,7 +183,7 @@
     const emojiEl = $("#subjectEmoji");
     const nameEl  = $("#subjectName");
     if (emojiEl) emojiEl.textContent = "🗺️";
-    if (nameEl)  nameEl.textContent  = "US State Capitals";
+    if (nameEl)  nameEl.textContent  = "US States & Territories";
   }
 
   // ---- Screen navigation ------------------------------------
@@ -536,11 +536,11 @@
     pickerMode = mode;
     selected = new Set();
     $("#pickerTitle").textContent = mode === "learn"
-      ? "Pick states to learn 📚"
+      ? "Pick places to learn 📚"
       : mode === "test"
-      ? "Pick states to test 📝"
-      : "Pick states to quiz 🎯";
-    $("#pickAll").textContent = "✅ Select All 50";
+      ? "Pick places to test 📝"
+      : "Pick places to quiz 🎯";
+    $("#pickAll").textContent = "✅ Select All";
     buildPickerRegions();
     updatePickCount();
     show("picker");
@@ -671,7 +671,7 @@
     const s = STATES.find(function (st) { return st.abbr === id; });
     if (!s) return;
     const frontText = s.state;
-    const tagHTML = '<div class="region-tag">' + REGION_EMOJI[s.region] + " " + s.region + " region</div>";
+    const tagHTML = '<div class="region-tag">' + REGION_EMOJI[s.region] + " " + (isTerritory(s) ? "US Territory" : s.region + " region") + "</div>";
     stateProgress(save, s.abbr).seen = true;
     persist(save);
 
@@ -909,7 +909,7 @@
   }
 
   function getWrongAnswers(correctAnswer, itemId, count) {
-    const pool = STATES
+    const pool = distractorPool(itemId)
       .map(function (s) { return quizMode === "reverse" ? s.state : s.capital; })
       .filter(function (v) { return v !== correctAnswer; });
     return shuffle(pool).slice(0, count);
@@ -932,7 +932,7 @@
     const s = STATES.find(function (st) { return st.abbr === id; });
     if (!s) return;
     if (quizMode === "reverse") {
-      questionText = '<p class="muted">Which state has this capital?</p><div class="q-state">🏛️ ' + s.capital + "</div>";
+      questionText = '<p class="muted">Which state or territory has this capital?</p><div class="q-state">🏛️ ' + s.capital + "</div>";
       correctAnswer = s.state;
     } else {
       questionText = '<p class="muted">What is the capital of…</p><div class="q-state">' + REGION_EMOJI[s.region] + " " + s.state + "</div>";
@@ -1153,7 +1153,7 @@
         '<p class="muted grade-scale">A 90–100 · B 80–89 · C 70–79 · D 60–69 · F below 60</p>';
     }
 
-    const masteredLine = "States mastered: " + mastered + " / 50";
+    const masteredLine = "Mastered: " + mastered + " / " + STATES.length;
     wrap.innerHTML =
       '<div class="result-emoji">' + emoji + "</div>" +
       "<h2>" + headline + "</h2>" +
@@ -1681,7 +1681,7 @@
   const TUTORIAL_STEPS = [
     { sel: "#goLearn",     title: "📚 Learn Mode", text: "Tap here to study flash cards. Great for your first time with a state!", arrow: "👆", side: "top" },
     { sel: "#goQuiz",      title: "🎯 Quiz Mode", text: "Ready to test yourself? Play a fun game and earn coins!", arrow: "👆", side: "top" },
-    { sel: "#goTest",      title: "📝 Test Mode", text: "The real challenge! Every question mixes multiple-choice and typing. Pick any states or all 50.", arrow: "👆", side: "top" },
+    { sel: "#goTest",      title: "📝 Test Mode", text: "The real challenge! Every question mixes multiple-choice and typing. Pick any states or territories, or everything.", arrow: "👆", side: "top" },
     { sel: "#shopPanel",   title: "🏪 Pack Shop", text: "Spend the coins you earn on animal packs. Each pack is a surprise — some animals are super rare! 🎁", arrow: "👇", side: "bottom" },
     { sel: "#zooPanel",    title: "🐾 My Collection", text: "Every animal you find from packs lives here. You can get doubles — try to collect them all! 🐶🦄", arrow: "👇", side: "bottom" },
     { sel: "#progressPanel", title: "📈 Your Progress", text: "This chart remembers your quiz scores so you can watch yourself get better!", arrow: "👇", side: "bottom" },

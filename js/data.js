@@ -1,10 +1,11 @@
 function _u(arr){return arr.map(function(x){return Array.isArray(x)?{id:x[0],question:x[1],answer:x[2],group:x[3]}:x;});}
 /* ============================================================
-   data.js — All 50 US states, their capitals, and helpers.
-   Grouped into "units" (regions) so lessons stay bite-sized.
+   data.js — All 50 US states and the 5 inhabited US territories, their
+   capitals, and helpers. Grouped into "units" (regions) so lessons stay
+   bite-sized.
    ============================================================ */
 
-// Every state with its capital and a fun little hint for learners.
+// Every state (and territory) with its capital.
 const STATES = [
   { abbr: "AL", state: "Alabama",        capital: "Montgomery",     region: "South" },
   { abbr: "AK", state: "Alaska",         capital: "Juneau",         region: "West" },
@@ -56,10 +57,16 @@ const STATES = [
   { abbr: "WV", state: "West Virginia",  capital: "Charleston",     region: "South" },
   { abbr: "WI", state: "Wisconsin",      capital: "Madison",        region: "Midwest" },
   { abbr: "WY", state: "Wyoming",        capital: "Cheyenne",       region: "West" },
+  // The five inhabited US territories.
+  { abbr: "AS", state: "American Samoa",           capital: "Pago Pago",       region: "Territories" },
+  { abbr: "GU", state: "Guam",                     capital: "Hagåtña",         region: "Territories" },
+  { abbr: "MP", state: "Northern Mariana Islands", capital: "Saipan",          region: "Territories" },
+  { abbr: "PR", state: "Puerto Rico",              capital: "San Juan",        region: "Territories" },
+  { abbr: "VI", state: "U.S. Virgin Islands",      capital: "Charlotte Amalie", region: "Territories" },
 ];
 
 // The regions we group states into, in a friendly order for kids.
-const REGIONS = ["Northeast", "South", "Midwest", "West"];
+const REGIONS = ["Northeast", "South", "Midwest", "West", "Territories"];
 
 // Little emoji flags for each region to make the picker fun.
 const REGION_EMOJI = {
@@ -67,6 +74,7 @@ const REGION_EMOJI = {
   South: "🌻",
   Midwest: "🌽",
   West: "🏔️",
+  Territories: "🏝️",
 };
 
 /* ---- Rarities ------------------------------------------------
@@ -267,9 +275,23 @@ function shuffle(arr) {
   return copy;
 }
 
+// Territories are only mixed with other territories (and states with states),
+// so a wrong answer never gives the game away and a player who is only
+// studying the 50 states doesn't see unfamiliar territory names as options.
+function isTerritory(s) {
+  return !!s && s.region === "Territories";
+}
+
+// The states/territories that can serve as wrong answers for `abbr`.
+function distractorPool(abbr) {
+  const asked = STATES.find((s) => s.abbr === abbr);
+  return STATES.filter((s) => s.abbr !== abbr && isTerritory(s) === isTerritory(asked));
+}
+
 // Pick `n` wrong capital answers that are not the correct one.
 function wrongCapitals(correctCapital, n) {
-  const pool = STATES
+  const asked = STATES.find((s) => s.capital === correctCapital);
+  const pool = distractorPool(asked && asked.abbr)
     .map((s) => s.capital)
     .filter((c) => c !== correctCapital);
   return shuffle(pool).slice(0, n);
@@ -358,7 +380,7 @@ function gradeFor(correct, total) {
 
 /* ---- Subjects registry ------------------------------------- */
 const SUBJECTS = [
-  { id: "capitals", name: "State Capitals", emoji: "🗺️", grade: null, desc: "All 50 US state capitals" }
+  { id: "capitals", name: "State Capitals", emoji: "🗺️", grade: null, desc: "All 50 US state capitals and 5 US territories" }
 ];
 
 /* ---- Subject helpers --------------------------------------- */
@@ -388,6 +410,8 @@ if (typeof window !== "undefined") {
   window.getSubjectItems = getSubjectItems;
   window.getSubjectGroups = getSubjectGroups;
   window.rollFromPack = rollFromPack;
+  window.isTerritory = isTerritory;
+  window.distractorPool = distractorPool;
   window.COIN_REWARDS = COIN_REWARDS;
   window.checkTypedAnswer = checkTypedAnswer;
   window.gradeFor = gradeFor;
