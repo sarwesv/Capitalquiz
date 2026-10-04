@@ -1627,6 +1627,96 @@
   on("#helpBtn", "click", () => openOverlay("#helpOverlay"));
   on("#closeHelp", "click", () => closeOverlay("#helpOverlay"));
 
+  // ---- Feedback & bug reports -------------------------------
+  // The form in index.html posts to FormSubmit, which emails it to the address
+  // in the form's action. We send it with fetch to FormSubmit's /ajax/ endpoint
+  // so the player never leaves the app (the plain form still works without JS).
+  const FEEDBACK_MIN = 10;               // shortest message we'll send.
+  const FEEDBACK_COOLDOWN_MS = 15000;    // minimum gap between two sends.
+  let feedbackSending = false;
+  let feedbackLastAt = 0;
+
+  function currentScreenName() {
+    return screens.find(function (s) { return !$("#screen-" + s).classList.contains("hidden"); }) || "unknown";
+  }
+  function setFeedbackStatus(text, kind) {
+    const el = $("#feedbackStatus");
+    el.textContent = text;
+    el.className = "feedback-status" + (kind ? " " + kind : "");
+  }
+  function openFeedback() {
+    setFeedbackStatus("");
+    closeOverlay("#helpOverlay");
+    openOverlay("#feedbackOverlay");
+    $("#fbMessage").focus();
+  }
+
+  function sendFeedback(e) {
+    e.preventDefault();
+    if (feedbackSending) return;
+    const form = $("#feedbackForm");
+    // Only bots fill the hidden trap field: pretend it worked, send nothing.
+    if (form.elements._honey.value) { closeOverlay("#feedbackOverlay"); return; }
+
+    const message = form.elements.message.value.trim();
+    const email = form.elements.email.value.trim();
+    if (message.length < FEEDBACK_MIN) {
+      setFeedbackStatus("Please write a little more (at least " + FEEDBACK_MIN + " characters).", "error");
+      form.elements.message.focus();
+      return;
+    }
+    if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      setFeedbackStatus("That email doesn't look right. Fix it, or leave it blank.", "error");
+      form.elements.email.focus();
+      return;
+    }
+    const wait = FEEDBACK_COOLDOWN_MS - (Date.now() - feedbackLastAt);
+    if (wait > 0) {
+      setFeedbackStatus("Please wait " + Math.ceil(wait / 1000) + " seconds before sending another.", "error");
+      return;
+    }
+
+    const data = new FormData(form);
+    data.set("message", message);
+    if (!email) data.delete("email");
+    data.set("_subject", "Capitals Quest " + form.elements.type.value.toLowerCase());
+    // A little context so a bug can be found.
+    data.set("screen", currentScreenName());
+    data.set("browser", navigator.userAgent);
+    data.set("window_size", window.innerWidth + "x" + window.innerHeight);
+
+    feedbackSending = true;
+    $("#sendFeedback").disabled = true;
+    setFeedbackStatus("Sending…");
+    const url = form.getAttribute("action").replace("formsubmit.co/", "formsubmit.co/ajax/");
+    fetch(url, { method: "POST", headers: { Accept: "application/json" }, body: data })
+      .then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (body) {
+          if (!res.ok || String(body.success) !== "true") throw new Error(body.message || "HTTP " + res.status);
+        });
+      })
+      .then(function () {
+        feedbackLastAt = Date.now();
+        form.reset();
+        setFeedbackStatus("");
+        closeOverlay("#feedbackOverlay");
+        toast("Thank you! Your message was sent 🌟");
+      })
+      .catch(function (err) {
+        console.warn("Feedback not sent:", err);
+        setFeedbackStatus("Couldn't send right now. Check your internet and try again.", "error");
+      })
+      .then(function () {
+        feedbackSending = false;
+        $("#sendFeedback").disabled = false;
+      });
+  }
+
+  on("#openFeedback", "click", openFeedback);
+  on("#helpFeedback", "click", openFeedback);
+  on("#cancelFeedback", "click", () => closeOverlay("#feedbackOverlay"));
+  on("#feedbackForm", "submit", sendFeedback);
+
   $$("#themeSeg button").forEach((b) => {
     b.addEventListener("click", () => { applyTheme(b.dataset.theme); persist(save); });
   });

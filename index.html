@@ -286,6 +286,14 @@
 
         <div class="setting-row">
           <div>
+            <strong>Feedback &amp; bug reports</strong>
+            <div class="desc">Tell the developer what you think, or what broke.</div>
+          </div>
+          <button class="btn" id="openFeedback">Send</button>
+        </div>
+
+        <div class="setting-row">
+          <div>
             <strong>Reset all progress</strong>
             <div class="desc">Erases stars, animals &amp; chart.</div>
           </div>
@@ -342,6 +350,46 @@
     </main>
   </div>
 
+  <!-- ===== Feedback / bug report modal =====
+       Posts to FormSubmit (https://formsubmit.co), which emails the message to
+       the address in the action. app.js sends it with fetch to the /ajax/
+       endpoint so the player stays in the app; without JS the form still posts
+       normally. The first ever submission makes FormSubmit email an activation
+       link to that address. -->
+  <div id="feedbackOverlay" class="overlay hidden">
+    <div class="modal neo">
+      <h2>💬 Feedback &amp; Bugs</h2>
+      <p class="muted">Tell us what you think, or what went wrong. Your message goes straight to the developer.</p>
+      <form id="feedbackForm" action="https://formsubmit.co/mogalt@gmail.com" method="POST" novalidate>
+        <label class="field-label" for="fbType">What is this?</label>
+        <select id="fbType" name="type" class="field">
+          <option value="Feedback">Feedback or an idea</option>
+          <option value="Bug report">Bug report</option>
+        </select>
+
+        <label class="field-label" for="fbMessage">Your message</label>
+        <textarea id="fbMessage" name="message" class="field" rows="5" maxlength="2000" required
+          placeholder="What happened? What did you expect to happen?"></textarea>
+
+        <label class="field-label" for="fbEmail">Your email <span class="muted">(optional, so we can reply)</span></label>
+        <input id="fbEmail" name="email" type="email" class="field" autocomplete="email" maxlength="200" placeholder="you@example.com" />
+
+        <!-- Spam trap: people never see or fill this in; bots do. -->
+        <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <input type="hidden" name="_subject" value="Capitals Quest feedback" />
+        <input type="hidden" name="_template" value="table" />
+        <input type="hidden" name="_captcha" value="false" />
+
+        <p class="muted fine-print">We also send the screen you were on and your browser type to help fix bugs. Please don't include passwords or other private details.</p>
+        <p id="feedbackStatus" class="feedback-status" role="status" aria-live="polite"></p>
+        <div class="confirm-actions">
+          <button type="button" class="btn" id="cancelFeedback">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="sendFeedback">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ===== Help modal ===== -->
   <div id="helpOverlay" class="overlay hidden">
     <div class="modal neo">
@@ -354,6 +402,7 @@
       <div class="help-step"><span class="n">6</span><div>Your <strong>progress</strong> is saved automatically and shown on the chart. Try the <strong>Mini Games 🎮</strong> for a few extra coins each day.</div></div>
       <div class="help-step"><span class="n">7</span><div>Tap <strong>⚙️ Settings</strong> to change the look, theme, answer buttons, or replay this guide's arrows.</div></div>
       <p class="muted credit">Artwork: <a href="https://openmoji.org" target="_blank" rel="noopener">OpenMoji</a> by the OpenMoji contributors, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p>
+      <p class="center muted credit-link">Found a bug or have an idea? <button class="link-btn" id="helpFeedback">Send feedback</button></p>
       <div class="spacer"></div>
       <button class="btn btn-primary btn-block" id="closeHelp">Got it!</button>
     </div>

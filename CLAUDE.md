@@ -29,6 +29,8 @@ The only external resources are CDN-loaded at runtime:
 - **GSAP** (animations) — the app checks `typeof gsap` and degrades gracefully if
   it fails to load, so never assume GSAP is present.
 - **Google Fonts** (Baloo 2) — falls back to system fonts.
+- **FormSubmit** (`formsubmit.co`) — receives the feedback / bug-report form and emails it.
+  Only used when a player sends a message; nothing else depends on it.
 
 ## File map
 
@@ -70,6 +72,14 @@ raw localStorage.
 so progress, mastery, coins and every mode work unchanged. Wrong answers come from
 `distractorPool`, which only mixes territories with territories and states with states.
 Never hard-code "50" — use `STATES.length`.
+
+**Feedback & bug reports:** the `#feedbackForm` modal (Settings → "Feedback & bug reports", and a
+link in Help) posts to FormSubmit, which emails the message to the address in the form's `action`
+(`mogalt@gmail.com`). `sendFeedback` (`app.js`) sends it with `fetch` to FormSubmit's `/ajax/`
+endpoint so the player stays in the app; the plain form still works without JS. It has a hidden
+honeypot field, a 10-character minimum, a 15-second cooldown and no-double-send. The first ever
+submission makes FormSubmit email an activation link to that address — click it once. It never
+grants coins: the app has no backend, so it can't verify an admin approved a report.
 
 **Mastery:** a state is mastered when `p.correct >= 2`. Once mastered, the
 `masterRewarded` flag fires `claimMilestone` so the coin reward fires exactly once.

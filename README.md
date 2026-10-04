@@ -10,6 +10,7 @@ A fun, rewarding way for kids and learners to master all **50 US State Capitals 
   - **📚 Learn** — Bite-sized flash cards. Tap to flip a card and see the state capital.
   - **🎯 Quiz & Test** — Four game modes (Classic, Backwards, Streak Rush, and Type It) plus a mixed Test mode.
 - **📝 Graded Tests & Perfect Bonus** — Tests end with a standard letter grade (A–F). Get every answer right in a round of 5+ questions for a one-time-per-state +5 coin bonus.
+- **💬 Feedback & Bug Reports** — Players can send feedback or report a bug from Settings; it is emailed to the developer via FormSubmit.
 - **🎮 Mini Games** — Memory Match and Speed Round pay a few bonus coins (up to 15 a day).
 - **🪙 Coins & 🎁 Pack Shop** — Earn coins from milestone achievements in quizzes, then spend them in the Pack Shop. Each pack (Farm, Mammal, Bird, Ocean, Safari, Reptile, Bug, Polar, Dino, Mythical) awards a surprise animal with a physical-toy opening animation.
 - **⭐ Rarities & Duplicates** — Animals range from Common → Uncommon → Rare → Epic → Legendary. Collect duplicates and track your total count!

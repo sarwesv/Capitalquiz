@@ -506,6 +506,23 @@ body.answers-grid .answer {
 .qmode h3 { color: var(--md-primary); }
 .qmode small { color: var(--text-soft); }
 
+/* ---- Feedback form ------------------------------------------ */
+.field-label { display: block; font-weight: 700; font-size: 0.9rem; margin: 12px 0 4px; color: var(--md-on-surface); }
+.field {
+  width: 100%; padding: 12px 14px; font: inherit; font-size: 1rem; color: var(--text);
+  background: var(--md-surface-container); border: 1px solid var(--md-outline-variant);
+  border-radius: var(--radius); box-sizing: border-box;
+}
+textarea.field { resize: vertical; min-height: 110px; }
+.field:focus { outline: 3px solid var(--md-primary); outline-offset: 1px; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.fine-print { font-size: 0.75rem; margin: 12px 0 0; }
+.feedback-status { min-height: 1.4em; margin: 8px 0 0; font-weight: 700; font-size: 0.9rem; }
+.feedback-status.error { color: var(--danger); }
+.feedback-status.ok { color: var(--md-secondary); }
+.link-btn { background: none; border: none; padding: 0; font: inherit; font-weight: 700; color: var(--md-primary); cursor: pointer; text-decoration: underline; }
+.credit-link { margin-top: 10px; }
+
 /* ---- Test grade ---------------------------------------------- */
 .grade-card {
   display: inline-flex; align-items: center; gap: 16px; padding: 12px 22px 12px 14px;
