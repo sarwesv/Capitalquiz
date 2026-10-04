@@ -700,6 +700,10 @@
       card.innerHTML =
         '<div class="state-name">' + frontText + "</div>" +
         '<div class="capital-name">🏛️ ' + backText + "</div>" +
+        '<div class="facts">' +
+          '<div class="fact"><span class="fact-label">📜 Joined the US</span>' + joinedText(s.abbr) + "</div>" +
+          '<div class="fact"><span class="fact-label">🗺️ Where it is</span>' + whereText(s.abbr) + "</div>" +
+        "</div>" +
         '<div class="tap-hint">The capital of ' + frontText + " is " + backText + ".</div>";
     } else {
       renderCard();

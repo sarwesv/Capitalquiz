@@ -9,6 +9,7 @@ A fun, rewarding way for kids and learners to master all **50 US State Capitals 
 - **Two Core Modes**
   - **📚 Learn** — Bite-sized flash cards. Tap to flip a card and see the state capital.
   - **🎯 Quiz & Test** — Four game modes (Classic, Backwards, Streak Rush, and Type It) plus a mixed Test mode.
+- **📜 Joined the US & Where It Is** — The back of each flash card shows the order and date a state joined the US (or when a territory became one) and where it is.
 - **📝 Graded Tests & Perfect Bonus** — Tests end with a standard letter grade (A–F). Get every answer right in a round of 5+ questions for a one-time-per-state +5 coin bonus.
 - **💬 Feedback & Bug Reports** — Players can send feedback or report a bug from Settings; it is emailed to the developer via FormSubmit.
 - **🎮 Mini Games** — Memory Match and Speed Round pay a few bonus coins (up to 15 a day).

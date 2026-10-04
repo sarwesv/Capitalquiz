@@ -469,6 +469,12 @@ body.flat .btn:active { box-shadow: var(--elev-2); }
 .flash-card .state-name { font-size: 2rem; font-weight: 800; color: var(--md-primary); }
 .flash-card .capital-name { font-size: 1.6rem; font-weight: 800; color: var(--md-secondary); }
 .flash-card .tap-hint { font-size: 0.85rem; color: var(--text-soft); }
+.flash-card .facts { display: flex; flex-direction: column; gap: 10px; text-align: left; margin: 6px 0 2px; }
+.flash-card .fact { font-size: 0.92rem; line-height: 1.4; color: var(--text); }
+.flash-card .fact-label {
+  display: block; font-size: 0.75rem; font-weight: 800; color: var(--md-primary);
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 1px;
+}
 .flash-card .region-tag { font-size: 0.9rem; color: var(--text-soft); font-weight: 700; }
 
 .progress-bar { height: 14px; border-radius: 999px; background: var(--md-outline-variant); box-shadow: none; overflow: hidden; margin: 6px 0 18px; }

@@ -81,6 +81,12 @@ honeypot field, a 10-character minimum, a 15-second cooldown and no-double-send.
 submission makes FormSubmit email an activation link to that address — click it once. It never
 grants coins: the app has no backend, so it can't verify an admin approved a report.
 
+**Place facts:** `STATE_FACTS` (`data.js`) holds, for every state, the order and date it joined the US
+(`order` 1–50, ISO `date`) and for every territory the `year`/`note` it became US territory, plus a
+`where` description. `joinedText` / `whereText` format them for the back of the flash card. Keep
+the statehood order 1–50 unique and the dates ascending, and keep neighbour lists symmetric
+(if A says it borders B, B must say it borders A).
+
 **Mastery:** a state is mastered when `p.correct >= 2`. Once mastered, the
 `masterRewarded` flag fires `claimMilestone` so the coin reward fires exactly once.
 

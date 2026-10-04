@@ -275,6 +275,97 @@ function shuffle(arr) {
   return copy;
 }
 
+// ---- When each place joined the US, and where it is ----------
+// States: `order` is the number in which it became a state (1 = Delaware,
+// 50 = Hawaii) and `date` the day it joined. Territories never became states,
+// so they have `year` (when the US got them) and a `note` instead.
+// `where` is a short, kid-friendly description of the location.
+const STATE_FACTS = {
+  DE: { order: 1,  date: "1787-12-07", where: "On the Mid-Atlantic coast, by Delaware Bay. Borders Maryland, Pennsylvania and New Jersey." },
+  PA: { order: 2,  date: "1787-12-12", where: "In the Northeast, with a short shore on Lake Erie. Borders New York, New Jersey, Delaware, Maryland, West Virginia and Ohio." },
+  NJ: { order: 3,  date: "1787-12-18", where: "On the Mid-Atlantic coast between New York City and Philadelphia. Borders New York, Pennsylvania and Delaware." },
+  GA: { order: 4,  date: "1788-01-02", where: "In the Southeast, with an Atlantic coast. Borders Florida, Alabama, Tennessee, North Carolina and South Carolina." },
+  CT: { order: 5,  date: "1788-01-09", where: "In New England, on Long Island Sound. Borders New York, Massachusetts and Rhode Island." },
+  MA: { order: 6,  date: "1788-02-06", where: "In New England, on the Atlantic coast. Borders New Hampshire, Vermont, New York, Connecticut and Rhode Island." },
+  MD: { order: 7,  date: "1788-04-28", where: "On the Mid-Atlantic coast, around Chesapeake Bay. Borders Pennsylvania, Delaware, West Virginia and Virginia." },
+  SC: { order: 8,  date: "1788-05-23", where: "In the Southeast, on the Atlantic coast. Borders North Carolina and Georgia." },
+  NH: { order: 9,  date: "1788-06-21", where: "In northern New England, with a very short Atlantic coast. Borders Maine, Vermont, Massachusetts and Canada." },
+  VA: { order: 10, date: "1788-06-25", where: "On the Mid-Atlantic coast. Borders Maryland, West Virginia, Kentucky, Tennessee and North Carolina." },
+  NY: { order: 11, date: "1788-07-26", where: "In the Northeast, by the Atlantic Ocean and the Great Lakes. Borders Vermont, Massachusetts, Connecticut, New Jersey, Pennsylvania and Canada." },
+  NC: { order: 12, date: "1789-11-21", where: "In the Southeast, on the Atlantic coast. Borders Virginia, Tennessee, Georgia and South Carolina." },
+  RI: { order: 13, date: "1790-05-29", where: "The smallest state, in New England on the Atlantic coast. Borders Connecticut and Massachusetts." },
+  VT: { order: 14, date: "1791-03-04", where: "In northern New England, with no coast. Borders New Hampshire, Massachusetts, New York and Canada." },
+  KY: { order: 15, date: "1792-06-01", where: "In the Upper South, along the Ohio River. Borders Illinois, Indiana, Ohio, West Virginia, Virginia, Tennessee and Missouri." },
+  TN: { order: 16, date: "1796-06-01", where: "In the Upper South. It touches eight states: Kentucky, Virginia, North Carolina, Georgia, Alabama, Mississippi, Arkansas and Missouri." },
+  OH: { order: 17, date: "1803-03-01", where: "In the Midwest, on Lake Erie. Borders Michigan, Indiana, Kentucky, West Virginia and Pennsylvania." },
+  LA: { order: 18, date: "1812-04-30", where: "On the Gulf of Mexico coast, where the Mississippi River ends. Borders Texas, Arkansas and Mississippi." },
+  IN: { order: 19, date: "1816-12-11", where: "In the Midwest, touching Lake Michigan. Borders Michigan, Ohio, Kentucky and Illinois." },
+  MS: { order: 20, date: "1817-12-10", where: "In the Deep South, along the Mississippi River. Borders Tennessee, Alabama, Louisiana and Arkansas." },
+  IL: { order: 21, date: "1818-12-03", where: "In the Midwest, on Lake Michigan and the Mississippi River. Borders Wisconsin, Iowa, Missouri, Kentucky and Indiana." },
+  AL: { order: 22, date: "1819-12-14", where: "In the Southeast, with a short coast on the Gulf of Mexico. Borders Mississippi, Tennessee, Georgia and Florida." },
+  ME: { order: 23, date: "1820-03-15", where: "The northeastern tip of the US, on the Atlantic coast. Borders New Hampshire and Canada." },
+  MO: { order: 24, date: "1821-08-10", where: "In the Midwest, where the Missouri and Mississippi Rivers meet. Borders eight states: Iowa, Illinois, Kentucky, Tennessee, Arkansas, Oklahoma, Kansas and Nebraska." },
+  AR: { order: 25, date: "1836-06-15", where: "In the South-central US. Borders Missouri, Tennessee, Mississippi, Louisiana, Texas and Oklahoma." },
+  MI: { order: 26, date: "1837-01-26", where: "In the Great Lakes region, made of two peninsulas. Borders Ohio, Indiana and Wisconsin, and Canada across the water." },
+  FL: { order: 27, date: "1845-03-03", where: "A peninsula in the Southeast between the Atlantic Ocean and the Gulf of Mexico. Borders Georgia and Alabama." },
+  TX: { order: 28, date: "1845-12-29", where: "In the South-central US, on the Gulf of Mexico. Borders Mexico, New Mexico, Oklahoma, Arkansas and Louisiana." },
+  IA: { order: 29, date: "1846-12-28", where: "In the Midwest, between the Mississippi and Missouri Rivers. Borders Minnesota, Wisconsin, Illinois, Missouri, Nebraska and South Dakota." },
+  WI: { order: 30, date: "1848-05-29", where: "In the Upper Midwest, between Lake Michigan and Lake Superior. Borders Minnesota, Iowa, Illinois and Michigan." },
+  CA: { order: 31, date: "1850-09-09", where: "On the West Coast, along the Pacific Ocean. Borders Oregon, Nevada, Arizona and Mexico." },
+  MN: { order: 32, date: "1858-05-11", where: "In the Upper Midwest, on Lake Superior. Borders Canada, North Dakota, South Dakota, Iowa and Wisconsin." },
+  OR: { order: 33, date: "1859-02-14", where: "In the Pacific Northwest, on the Pacific coast. Borders Washington, Idaho, Nevada and California." },
+  KS: { order: 34, date: "1861-01-29", where: "In the middle of the lower 48 states. Borders Nebraska, Missouri, Oklahoma and Colorado." },
+  WV: { order: 35, date: "1863-06-20", where: "In the Appalachian Mountains. Borders Ohio, Pennsylvania, Maryland, Virginia and Kentucky." },
+  NV: { order: 36, date: "1864-10-31", where: "In the West, mostly desert. Borders Oregon, Idaho, Utah, Arizona and California." },
+  NE: { order: 37, date: "1867-03-01", where: "On the Great Plains. Borders South Dakota, Iowa, Missouri, Kansas, Colorado and Wyoming." },
+  CO: { order: 38, date: "1876-08-01", where: "In the Rocky Mountains, in the western middle of the US. Borders Wyoming, Nebraska, Kansas, Oklahoma, New Mexico and Utah." },
+  ND: { order: 39, date: "1889-11-02", where: "On the northern Great Plains. Borders Canada, Minnesota, South Dakota and Montana." },
+  SD: { order: 40, date: "1889-11-02", where: "On the northern Great Plains. Borders North Dakota, Minnesota, Iowa, Nebraska, Wyoming and Montana." },
+  MT: { order: 41, date: "1889-11-08", where: "In the northern Rocky Mountains. Borders Canada, Idaho, Wyoming, South Dakota and North Dakota." },
+  WA: { order: 42, date: "1889-11-11", where: "In the northwest corner of the lower 48, on the Pacific coast. Borders Oregon, Idaho and Canada." },
+  ID: { order: 43, date: "1890-07-03", where: "In the Northwest, in the Rocky Mountains. Borders Canada, Washington, Oregon, Nevada, Utah, Wyoming and Montana." },
+  WY: { order: 44, date: "1890-07-10", where: "In the Rocky Mountain West. Borders Montana, South Dakota, Nebraska, Colorado, Utah and Idaho." },
+  UT: { order: 45, date: "1896-01-04", where: "In the Mountain West, next to the Great Salt Lake. Borders Idaho, Wyoming, Colorado, Arizona and Nevada." },
+  OK: { order: 46, date: "1907-11-16", where: "In the South-central US. Borders Kansas, Missouri, Arkansas, Texas, New Mexico and Colorado." },
+  NM: { order: 47, date: "1912-01-06", where: "In the Southwest. Borders Arizona, Colorado, Oklahoma, Texas and Mexico." },
+  AZ: { order: 48, date: "1912-02-14", where: "In the Southwest. Borders Mexico, California, Nevada, Utah and New Mexico." },
+  AK: { order: 49, date: "1959-01-03", where: "In the far northwest of North America, separated from the lower 48 by Canada." },
+  HI: { order: 50, date: "1959-08-21", where: "A chain of islands in the middle of the Pacific Ocean, about 2,400 miles from California." },
+  // Territories
+  PR: { year: 1898, note: "taken from Spain after the Spanish-American War", where: "An island in the Caribbean Sea, about 1,000 miles southeast of Florida." },
+  GU: { year: 1898, note: "taken from Spain after the Spanish-American War", where: "An island in the western Pacific Ocean, about 3,800 miles west of Hawaii." },
+  VI: { year: 1917, note: "bought from Denmark for $25 million", where: "Islands in the Caribbean Sea, just east of Puerto Rico." },
+  AS: { year: 1900, note: "islands of the South Pacific joined the US", where: "Islands in the South Pacific Ocean, about 2,600 miles southwest of Hawaii." },
+  MP: { year: 1986, note: "became a US commonwealth (the US had run it since 1947)", where: "Islands in the western Pacific Ocean, just north of Guam." },
+};
+
+// "1st", "2nd", "3rd", "4th" ... "11th", "12th", "13th", "21st", ...
+function ordinal(n) {
+  const v = n % 100;
+  if (v >= 11 && v <= 13) return n + "th";
+  return n + (["th", "st", "nd", "rd"][n % 10] || "th");
+}
+
+// "December 7, 1787" from "1787-12-07".
+function longDate(iso) {
+  const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const p = iso.split("-");
+  return MONTHS[+p[1] - 1] + " " + +p[2] + ", " + p[0];
+}
+
+// One line about how/when a place joined the US, for the flash card.
+function joinedText(abbr) {
+  const f = STATE_FACTS[abbr];
+  if (!f) return "";
+  if (f.order) return "The " + ordinal(f.order) + " state to join the US, on " + longDate(f.date) + ".";
+  return "A US territory since " + f.year + " (" + f.note + ").";
+}
+
+// A short description of where a place is.
+function whereText(abbr) {
+  return STATE_FACTS[abbr] ? STATE_FACTS[abbr].where : "";
+}
+
 // Territories are only mixed with other territories (and states with states),
 // so a wrong answer never gives the game away and a player who is only
 // studying the 50 states doesn't see unfamiliar territory names as options.
@@ -411,6 +502,9 @@ if (typeof window !== "undefined") {
   window.getSubjectGroups = getSubjectGroups;
   window.rollFromPack = rollFromPack;
   window.isTerritory = isTerritory;
+  window.STATE_FACTS = STATE_FACTS;
+  window.joinedText = joinedText;
+  window.whereText = whereText;
   window.distractorPool = distractorPool;
   window.COIN_REWARDS = COIN_REWARDS;
   window.checkTypedAnswer = checkTypedAnswer;
