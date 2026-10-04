@@ -520,6 +520,13 @@ body.answers-grid .answer {
 .qmode small { color: var(--text-soft); }
 
 /* ---- Feedback form ------------------------------------------ */
+.warn-banner {
+  display: flex; align-items: flex-start; gap: 10px; margin: 0 0 14px; padding: 12px 14px;
+  border-radius: var(--radius); border: 1px solid var(--danger); border-left-width: 6px;
+  background: rgba(239, 68, 68, 0.12); color: var(--text); font-size: 0.92rem; line-height: 1.4;
+}
+.warn-banner strong { color: var(--danger); color: color-mix(in srgb, var(--danger) 55%, var(--text)); }
+.warn-banner .warn-icon { font-size: 1.2rem; line-height: 1.2; flex: none; }
 .field-label { display: block; font-weight: 700; font-size: 0.9rem; margin: 12px 0 4px; color: var(--md-on-surface); }
 .field {
   width: 100%; padding: 12px 14px; font: inherit; font-size: 1rem; color: var(--text);

@@ -77,7 +77,9 @@ Never hard-code "50" — use `STATES.length`.
 link in Help) posts to FormSubmit, which emails the message to the address in the form's `action`
 (`mogalt@gmail.com`). `sendFeedback` (`app.js`) sends it with `fetch` to FormSubmit's `/ajax/`
 endpoint so the player stays in the app; the plain form still works without JS. It has a hidden
-honeypot field, a 10-character minimum, a 15-second cooldown and no-double-send. The first ever
+honeypot field, a 10-character minimum, a 15-second cooldown and no-double-send. The modal always
+shows a warning banner (`#feedbackWarning`) that inappropriate use of feedback results in a ban —
+there is no automated ban (no accounts/backend), so it is a notice. The first ever
 submission makes FormSubmit email an activation link to that address — click it once. It never
 grants coins: the app has no backend, so it can't verify an admin approved a report.
 
