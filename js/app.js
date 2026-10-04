@@ -1770,13 +1770,14 @@
   // ============================================================
   const TUTORIAL_STEPS = [
     { sel: "#goLearn",     title: "📚 Learn Mode", text: "Tap here to study flash cards. Great for your first time with a state!", arrow: "👆", side: "top" },
-    { sel: "#goQuiz",      title: "🎯 Quiz Mode", text: "Ready to test yourself? Play a fun game and earn coins!", arrow: "👆", side: "top" },
-    { sel: "#goTest",      title: "📝 Test Mode", text: "The real challenge! Every question mixes multiple-choice and typing. Pick any states or territories, or everything.", arrow: "👆", side: "top" },
+    { sel: "#goQuiz",      title: "🎯 Quiz Mode", text: "Ready to test yourself? Play a fun game and earn coins! Get every answer right in a round of 5 or more for a 🏆 bonus.", arrow: "👆", side: "top" },
+    { sel: "#goTest",      title: "📝 Test Mode", text: "The real challenge! Every question mixes multiple-choice and typing. Pick any states or territories, or everything. You get a letter grade at the end!", arrow: "👆", side: "top" },
+    { sel: "#goGames",     title: "🎮 Mini Games", text: "Memory Match and Speed Round pay a few bonus coins. You can earn up to 15 a day, so come back often!", arrow: "👆", side: "top" },
     { sel: "#shopPanel",   title: "🏪 Pack Shop", text: "Spend the coins you earn on animal packs. Each pack is a surprise — some animals are super rare! 🎁", arrow: "👇", side: "bottom" },
     { sel: "#zooPanel",    title: "🐾 My Collection", text: "Every animal you find from packs lives here. You can get doubles — try to collect them all! 🐶🦄", arrow: "👇", side: "bottom" },
     { sel: "#progressPanel", title: "📈 Your Progress", text: "This chart remembers your quiz scores so you can watch yourself get better!", arrow: "👇", side: "bottom" },
     { sel: "#helpBtn",     title: "❓ Help Anytime", text: "Stuck? Tap the question mark for a quick guide — anytime.", arrow: "👆", side: "top" },
-    { sel: "#settingsBtn", title: "⚙️ Settings", text: "Change the look, switch light/dark, or replay this tour whenever you like.", arrow: "👆", side: "top" },
+    { sel: "#settingsBtn", title: "⚙️ Settings", text: "Change the look, switch light/dark, send feedback or report a bug, or replay this tour whenever you like.", arrow: "👆", side: "top" },
   ];
   let tutStep = 0;
 
