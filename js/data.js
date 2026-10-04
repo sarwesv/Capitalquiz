@@ -335,8 +335,8 @@ const STATE_FACTS = {
   PR: { year: 1898, note: "taken from Spain after the Spanish-American War", where: "An island in the Caribbean Sea, about 1,000 miles southeast of Florida." },
   GU: { year: 1898, note: "taken from Spain after the Spanish-American War", where: "An island in the western Pacific Ocean, about 3,800 miles west of Hawaii." },
   VI: { year: 1917, note: "bought from Denmark for $25 million", where: "Islands in the Caribbean Sea, just east of Puerto Rico." },
-  AS: { year: 1900, note: "islands of the South Pacific joined the US", where: "Islands in the South Pacific Ocean, about 2,600 miles southwest of Hawaii." },
-  MP: { year: 1986, note: "became a US commonwealth (the US had run it since 1947)", where: "Islands in the western Pacific Ocean, just north of Guam." },
+  AS: { year: 1900, note: "its chiefs gave the main island, Tutuila, to the US", where: "Islands in the South Pacific Ocean, about 2,600 miles southwest of Hawaii." },
+  MP: { year: 1986, note: "became a US commonwealth; the US had run it since 1947", where: "Islands in the western Pacific Ocean, just north of Guam." },
 };
 
 // "1st", "2nd", "3rd", "4th" ... "11th", "12th", "13th", "21st", ...

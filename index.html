@@ -204,6 +204,7 @@
       <p class="center muted" id="quizCounter"></p>
       <div class="question-card neo" id="questionCard"></div>
       <div class="answer-grid" id="answerGrid"></div>
+      <div class="fact-panel neo hidden" id="factPanel"></div>
     </main>
 
     <!-- ===== RESULTS screen ===== -->
@@ -274,6 +275,14 @@
             <div class="desc">Play audio for correct answers, reveals &amp; packs.</div>
           </div>
           <label class="switch"><input type="checkbox" id="soundToggle" /><span class="slider"></span></label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <strong>Facts after each answer</strong>
+            <div class="desc">Show when a place joined the US and where it is. Turn off for a faster quiz.</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="factsToggle" /><span class="slider"></span></label>
         </div>
 
         <div class="setting-row">

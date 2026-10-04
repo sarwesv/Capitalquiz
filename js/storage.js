@@ -10,6 +10,7 @@ const LEGACY_STORAGE_KEY = "prodigymind.v1";
 function defaultSave() {
   return {
     sound: true,               // Sound effects enabled by default.
+    quizFacts: true,           // Show "joined the US / where it is" after each quiz answer (waits for Next).
     tutorialDone: false,       // Have we shown the arrow tutorial yet?
     neomorphism: true,         // Soft "neomorphism" look on or off.
     // Per-state mastery. Each entry: { seen, correct, attempts, mastered }

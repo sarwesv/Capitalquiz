@@ -805,6 +805,8 @@
   let isAnswering = false;  // prevents double-submitting / bypassing on quick Enter keypresses.
   let advanceTimer = null;  // pending move to the next question after an answer.
   let pendingAdvance = null; // what that timer will run (nextQuestion or finishQuiz).
+  let advanceHeld = false;   // true when we wait for the player to tap Next (no timer).
+  let factTimer = null;      // briefly keeps Next disabled so a double-tap can't skip the facts.
 
   function scheduleAdvance(fn, delay) {
     cancelAdvance();
@@ -823,7 +825,45 @@
     if (advanceTimer) clearTimeout(advanceTimer);
     advanceTimer = null;
     pendingAdvance = null;
+    advanceHeld = false;
     return fn;
+  }
+
+  // Wait for the player to tap Next instead of moving on by itself.
+  function holdAdvance(fn) {
+    cancelAdvance();
+    pendingAdvance = fn;
+    advanceHeld = true;
+  }
+
+  // After an answer: what this place joined the US as, and where it is.
+  function showFacts(abbr, onNext, isLast) {
+    const s = STATES.find(function (st) { return st.abbr === abbr; });
+    if (!s) { scheduleAdvance(onNext, 950); return; }
+    const panel = $("#factPanel");
+    panel.innerHTML =
+      "<h3>About " + s.state + "</h3>" +
+      '<div class="fact"><span class="fact-label">📜 Joined the US</span>' + joinedText(abbr) + "</div>" +
+      '<div class="fact"><span class="fact-label">🗺️ Where it is</span>' + whereText(abbr) + "</div>" +
+      '<button class="btn btn-primary btn-block" id="factNext" disabled>' + (isLast ? "See results →" : "Next →") + "</button>";
+    panel.classList.remove("hidden");
+    holdAdvance(onNext);
+    on("#factNext", "click", function () {
+      const fn = cancelAdvance();   // a second tap finds nothing pending and does nothing.
+      if (fn) fn();
+    });
+    // No auto-focus, and Next stays off for a moment, so a double-tapped Enter
+    // or Submit can't blow straight through the facts.
+    clearTimeout(factTimer);
+    factTimer = setTimeout(function () { const b = $("#factNext"); if (b) b.disabled = false; }, 500);
+    animIn(panel, { y: 8 });
+    panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  function hideFacts() {
+    clearTimeout(factTimer);
+    const panel = $("#factPanel");
+    panel.classList.add("hidden");
+    panel.innerHTML = "";
   }
 
   // Weighted random pick — items with lower mastery appear more often.
@@ -921,6 +961,7 @@
 
   function renderQuestion() {
     isAnswering = false;
+    hideFacts();
     const id = quizList[quizIdx];
     $("#quizCounter").textContent = "Question " + (quizIdx + 1) + " of " + quizList.length;
     $("#quizBar").style.width = (quizIdx / quizList.length * 100) + "%";
@@ -1048,7 +1089,13 @@
     persist(save);
 
     // Streak Rush ends the moment you miss.
-    if (quizMode === "streak" && !isCorrect) {
+    const ending = quizMode === "streak" && !isCorrect;
+    // Show the facts and wait for Next (unless the player turned that off).
+    if (save.quizFacts !== false) {
+      showFacts(id, ending ? finishQuiz : nextQuestion, ending || quizIdx >= quizList.length - 1);
+      return;
+    }
+    if (ending) {
       scheduleAdvance(finishQuiz, 900);
       return;
     }
@@ -1067,6 +1114,7 @@
 
   on("#exitQuiz", "click", () => {
     // Freeze any pending move to the next question while the dialog is up.
+    const wasHeld = advanceHeld;
     const pending = cancelAdvance();
     gameConfirm({
       emoji: "⏸️",
@@ -1086,7 +1134,11 @@
         stopTimer();
         show("home"); renderHome();
       },
-      onCancel: () => { if (pending) pending(); },
+      onCancel: () => {
+        if (!pending) return;
+        if (wasHeld) holdAdvance(pending);  // still waiting on Next, facts stay up.
+        else pending();
+      },
     });
   });
 
@@ -1727,6 +1779,14 @@
   $$("#layoutSeg button").forEach((b) => {
     b.addEventListener("click", () => { applyAnswerLayout(b.dataset.layout); persist(save); });
   });
+  const factsToggle = $("#factsToggle");
+  if (factsToggle) {
+    factsToggle.checked = save.quizFacts !== false;
+    factsToggle.addEventListener("change", () => {
+      save.quizFacts = factsToggle.checked;
+      persist(save);
+    });
+  }
   const soundToggle = $("#soundToggle");
   if (soundToggle) {
     soundToggle.checked = save.sound !== false;

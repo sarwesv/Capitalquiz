@@ -87,6 +87,13 @@ grants coins: the app has no backend, so it can't verify an admin approved a rep
 the statehood order 1–50 unique and the dates ascending, and keep neighbour lists symmetric
 (if A says it borders B, B must say it borders A).
 
+**Quiz facts:** after each quiz/test answer `showFacts` (`app.js`) shows the place's facts in `#factPanel` and
+*waits* for the player to tap Next (`holdAdvance`; no timer). Facts only appear **after** answering —
+in Backwards mode the state is the answer. Next starts disabled for 500 ms and is never auto-focused so
+a double-tapped Enter can't skip past it. The Settings switch `save.quizFacts` (default on) turns this
+off, which restores the old timed advance (`scheduleAdvance`). The exit dialog must keep working in both
+modes (`advanceHeld`).
+
 **Mastery:** a state is mastered when `p.correct >= 2`. Once mastered, the
 `masterRewarded` flag fires `claimMilestone` so the coin reward fires exactly once.
 
