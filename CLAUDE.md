@@ -41,6 +41,8 @@ css/styles.css  MD3 design tokens, theme variables, layout, component styles, an
 js/data.js      Static data + pure helpers: STATES (50 states + 5 territories),
                 REGIONS (incl. "Territories"), RARITIES,
                 PACKS (animal library), and helpers like shuffle/rollFromPack.
+js/map-data.js  GENERATED outline paths for the Map Pointing game (50 states + DC, and the five
+                territories as island tiles). Don't edit by hand: regenerate with tools/gen-map-data.js.
 js/storage.js   Everything that touches localStorage. defaultSave() is the
                 schema; all persistence goes through load/persist here.
 js/emoji.js     Swaps emoji for OpenMoji SVGs from assets/openmoji/ (DOM observer).
@@ -49,7 +51,7 @@ js/app.js       All behavior, wrapped in one IIFE. Screen nav, learn, quiz,
                 test, shop, packs, collection, time-on-task, tutorial, chart.
 ```
 
-Load order in `index.html` matters: `data.js` → `storage.js` → `emoji.js` → `firebase-config.js` → `firebase.js` → `app.js`.
+Load order in `index.html` matters: `data.js` → `map-data.js` → `storage.js` → `emoji.js` → `firebase-config.js` → `firebase.js` → `app.js`.
 
 ## Architecture
 
@@ -100,6 +102,16 @@ modes (`advanceHeld`).
 `masterRewarded` flag fires `claimMilestone` so the coin reward fires exactly once.
 
 **Test grade:** the results screen of a Test shows a standard letter grade from `gradeFor` (`data.js`).
+
+**Map Pointing:** home card `#goMap` → the normal place picker (`pickerMode = "map"`) → screen `map`.
+`startMap` shuffles the picked places; `answerMap` handles a tap on any `[data-abbr]` element (a state's
+`<path>` or a territory's island tile), highlights right/wrong, rings a small state (`ringMapRegion`) and
+shows capital + where it is with a Next button (same double-tap guard as quiz facts). The map is drawn
+once from `MAP_DATA` (`js/map-data.js`); zoom (`MAP_ZOOMS`) just widens the SVG inside a scrollable box,
+so panning is native scrolling. **No place names may appear on the map** (text, `title`, `aria-label`):
+they would give the answer away. DC is drawn but is not a place (tapping it only shows a toast). The
+game earns **no coins** and does not touch quiz progress; it is logged in Time on Task as type `"map"`.
+`js/map-data.js` comes from US Census (us-atlas) + Natural Earth (world-atlas) data, both public domain.
 
 **Mini games:** screens `games` (hub) and `game` (play area). `startMemory` / `startSpeed` are
 the games; `show()` calls `stopGame()` whenever you leave the `game` screen, and all game

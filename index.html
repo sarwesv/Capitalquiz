@@ -74,6 +74,11 @@
           <h2>Test</h2>
           <p>The real challenge — mixes multiple-choice <em>and</em> typing!</p>
         </div>
+        <div class="mode-card neo" id="goMap" role="button" tabindex="0">
+          <span class="big-emoji">🗺️</span>
+          <h2>Map Pointing</h2>
+          <p>We name a place — you find it on the map!</p>
+        </div>
         <div class="mode-card neo" id="goGames" role="button" tabindex="0">
           <span class="big-emoji">🎮</span>
           <h2>Mini Games</h2>
@@ -210,6 +215,31 @@
     <!-- ===== RESULTS screen ===== -->
     <main id="screen-results" class="screen hidden">
       <div class="result-wrap" id="resultWrap"></div>
+    </main>
+
+    <!-- ===== MAP POINTING screen ===== -->
+    <main id="screen-map" class="screen hidden">
+      <div class="task-head">
+        <button class="back-link" id="exitMap">← Exit map</button>
+        <span id="mapTimer" class="task-timer neo-inset" title="Time on this game">⏱️ 0:00</span>
+      </div>
+      <div class="quiz-head">
+        <div class="progress-bar neo-inset" style="flex:1;"><span id="mapBar"></span></div>
+        <span class="streak" id="mapScore">🎯 0</span>
+      </div>
+      <p class="center muted" id="mapCounter"></p>
+      <div class="question-card neo" id="mapPrompt"></div>
+      <div class="map-tools">
+        <span class="muted">Zoom in to tap small states</span>
+        <span class="map-zoom">
+          <button type="button" class="btn" id="mapZoomOut" aria-label="Zoom out">−</button>
+          <span id="mapZoomLabel" class="map-zoom-label">×1</span>
+          <button type="button" class="btn" id="mapZoomIn" aria-label="Zoom in">+</button>
+        </span>
+      </div>
+      <div class="map-scroll neo" id="mapScroll"><div id="mapStage"></div></div>
+      <div id="mapTerritories" class="map-territories"></div>
+      <div class="fact-panel neo hidden" id="mapFeedback" role="status" aria-live="polite"></div>
     </main>
 
     <!-- ===== MINI GAMES hub ===== -->
@@ -414,6 +444,7 @@
       <div class="help-step"><span class="n">5</span><div>Spend coins in the <strong>Pack Shop</strong> to open animal packs 🎁 — some animals are super rare! Collect them all 🐶🦄.</div></div>
       <div class="help-step"><span class="n">6</span><div>Your <strong>progress</strong> is saved automatically and shown on the chart. Try the <strong>Mini Games 🎮</strong> for a few extra coins each day.</div></div>
       <div class="help-step"><span class="n">7</span><div>Tap <strong>⚙️ Settings</strong> to change the look, theme, answer buttons, or replay this guide's arrows.</div></div>
+      <div class="help-step"><span class="n">8</span><div><strong>Map Pointing 🗺️</strong> names a state or territory and you tap where it is on the map. Pick which places to practice, and zoom in for the small states.</div></div>
       <p class="muted credit">Artwork: <a href="https://openmoji.org" target="_blank" rel="noopener">OpenMoji</a> by the OpenMoji contributors, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p>
       <p class="center muted credit-link">Found a bug or have an idea? <button class="link-btn" id="helpFeedback">Send feedback</button></p>
       <div class="spacer"></div>
@@ -441,6 +472,7 @@
   <!-- GSAP for animations (from CDN). App still works if it fails to load. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="js/data.js"></script>
+  <script src="js/map-data.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/emoji.js"></script>
   <script src="js/firebase-config.js"></script>

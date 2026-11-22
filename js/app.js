@@ -186,7 +186,7 @@
   }
 
   // ---- Screen navigation ------------------------------------
-  const screens = ["home", "picker", "learn", "qmode", "quiz", "results", "settings", "auth", "games", "game"];
+  const screens = ["home", "picker", "learn", "qmode", "quiz", "results", "settings", "auth", "games", "game", "map"];
   function show(name) {
     if (name !== "game") stopGame();
     screens.forEach((s) => $("#screen-" + s).classList.toggle("hidden", s !== name));
@@ -306,12 +306,13 @@
     // Newest first.
     log.slice().reverse().forEach((a) => {
       const isQuiz = a.type === "quiz";
+      const isMap = a.type === "map";
       const isTest = isQuiz && a.quizMode === "test";
-      const icon = isTest ? "📝" : isQuiz ? "🎯" : "📚";
-      const modeName = !isQuiz ? "Lesson"
+      const icon = isMap ? "🗺️" : isTest ? "📝" : isQuiz ? "🎯" : "📚";
+      const modeName = isMap ? "Map Pointing" : !isQuiz ? "Lesson"
         : isTest ? "Test"
         : ((QUIZ_MODES.find((m) => m.id === a.quizMode) || {}).name || "Quiz");
-      const scoreTxt = isQuiz && typeof a.score === "number" ? " · " + a.score + "/" + a.total : "";
+      const scoreTxt = (isQuiz || isMap) && typeof a.score === "number" ? " · " + a.score + "/" + a.total : "";
       const nStates = a.states ? a.states.length : 0;
 
       const row = document.createElement("div");
@@ -540,6 +541,8 @@
       ? "Pick places to learn 📚"
       : mode === "test"
       ? "Pick places to test 📝"
+      : mode === "map"
+      ? "Pick places for the map 🗺️"
       : "Pick places to quiz 🎯";
     $("#pickAll").textContent = "✅ Select All";
     buildPickerRegions();
@@ -645,6 +648,7 @@
     }
     if (pickerMode === "learn") startLearn();
     else if (pickerMode === "test") { quizMode = "test"; startQuiz(Array.from(selected)); }
+    else if (pickerMode === "map") startMap(Array.from(selected));
     else openQuizModePicker();
   });
 
@@ -1508,6 +1512,196 @@
 
   on("#exitGame", "click", openGames);
 
+  // ============================================================
+  // MAP POINTING — the app names a state or territory, you find it on the map
+  // ============================================================
+  // The 50 states are on a zoomable map (js/map-data.js). The territories are
+  // too small to draw at that scale, so each gets a tappable island tile under
+  // the map. This game pays no coins (the economy stays quiz/test/mini-game only).
+  const MAP_ZOOMS = [1, 1.5, 2, 3, 4, 6];
+  const MAP_TERRITORY_GROUPS = [
+    { label: "Caribbean Sea", items: ["PR", "VI"] },
+    { label: "Pacific Ocean", items: ["MP", "GU", "AS"] },
+  ];
+  let mapList = [];
+  let mapIdx = 0;
+  let mapScore = 0;
+  let mapMissed = [];
+  let mapAnswered = false;
+  let mapZoomIdx = 0;
+  let mapBuilt = false;
+
+  // Draw the map once. Tiles/regions carry data-abbr so one click handler can
+  // tell what was tapped. No names anywhere: they would give the answer away.
+  function buildMap() {
+    if (mapBuilt) return;
+    const M = window.MAP_DATA;
+    let svg = '<svg id="mapSvg" viewBox="0 0 ' + M.width + " " + M.height + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of the United States">';
+    Object.keys(M.states).forEach(function (abbr) {
+      svg += '<path class="map-region" data-abbr="' + abbr + '" fill-rule="evenodd" d="' + M.states[abbr] + '"/>';
+    });
+    svg += '<path class="map-dc" fill-rule="evenodd" d="' + M.dc + '"/></svg>';
+    $("#mapStage").innerHTML = svg;
+
+    $("#mapTerritories").innerHTML = MAP_TERRITORY_GROUPS.map(function (g) {
+      return '<div class="terr-group"><div class="terr-label">' + g.label + '</div><div class="terr-row">' +
+        g.items.map(function (abbr) {
+          return '<button type="button" class="terr-tile" data-abbr="' + abbr + '" aria-label="Island group">' +
+            '<svg viewBox="0 0 ' + M.box.w + " " + M.box.h + '"><path fill-rule="evenodd" d="' + M.territories[abbr] + '"/></svg></button>';
+        }).join("") +
+        "</div></div>";
+    }).join("");
+    mapBuilt = true;
+  }
+
+  function setMapZoom(idx) {
+    const box = $("#mapScroll"), svg = $("#mapSvg");
+    mapZoomIdx = Math.max(0, Math.min(MAP_ZOOMS.length - 1, idx));
+    // keep whatever is in the middle of the view in the middle after zooming
+    const cx = svg.clientWidth ? (box.scrollLeft + box.clientWidth / 2) / svg.clientWidth : 0.5;
+    const cy = svg.clientHeight ? (box.scrollTop + box.clientHeight / 2) / svg.clientHeight : 0.5;
+    svg.style.width = (MAP_ZOOMS[mapZoomIdx] * 100) + "%";
+    box.scrollLeft = cx * svg.clientWidth - box.clientWidth / 2;
+    box.scrollTop = cy * svg.clientHeight - box.clientHeight / 2;
+    $("#mapZoomLabel").textContent = "×" + MAP_ZOOMS[mapZoomIdx];
+    $("#mapZoomOut").disabled = mapZoomIdx === 0;
+    $("#mapZoomIn").disabled = mapZoomIdx === MAP_ZOOMS.length - 1;
+  }
+
+  function startMap(abbrs) {
+    mapList = shuffle(abbrs.slice());
+    mapIdx = 0;
+    mapScore = 0;
+    mapMissed = [];
+    startTimer("#mapTimer");
+    show("map");
+    buildMap();
+    setMapZoom(0);
+    renderMapQuestion();
+  }
+
+  function renderMapQuestion() {
+    const s = stateByAbbr(mapList[mapIdx]);
+    mapAnswered = false;
+    $$("#screen-map .correct, #screen-map .wrong, #screen-map .reveal").forEach(function (el) {
+      el.classList.remove("correct", "wrong", "reveal");
+    });
+    $$("#mapSvg .map-ring").forEach(function (el) { el.parentNode.removeChild(el); });
+    const fb = $("#mapFeedback");
+    fb.classList.add("hidden");
+    fb.innerHTML = "";
+    $("#mapCounter").textContent = "Place " + (mapIdx + 1) + " of " + mapList.length;
+    $("#mapBar").style.width = (mapIdx / mapList.length * 100) + "%";
+    $("#mapScore").textContent = "🎯 " + mapScore;
+    $("#mapPrompt").innerHTML = '<p class="muted">Find this on the map:</p><div class="q-state">🗺️ ' + s.state + "</div>";
+    pop($("#mapPrompt"));
+  }
+
+  // A ring around the right state after a wrong answer: small states (Rhode
+  // Island...) are only a speck on a phone-sized map and easy to miss.
+  function ringMapRegion(abbr) {
+    const path = $('#mapSvg .map-region[data-abbr="' + abbr + '"]');
+    if (!path) return;
+    const bb = path.getBBox();
+    const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    ring.setAttribute("class", "map-ring");
+    ring.setAttribute("cx", bb.x + bb.width / 2);
+    ring.setAttribute("cy", bb.y + bb.height / 2);
+    ring.setAttribute("r", Math.max(16, Math.max(bb.width, bb.height) * 0.7));
+    $("#mapSvg").appendChild(ring);
+  }
+
+  // After a wrong answer, scroll the zoomed map so the right place is in view.
+  function focusMapRegion(abbr) {
+    const path = $('#mapSvg .map-region[data-abbr="' + abbr + '"]');
+    if (!path) {
+      const tile = $('.terr-tile[data-abbr="' + abbr + '"]');
+      if (tile && tile.scrollIntoView) tile.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      return;
+    }
+    const box = $("#mapScroll"), svg = $("#mapSvg");
+    const bb = path.getBBox(), k = svg.clientWidth / window.MAP_DATA.width;
+    box.scrollLeft = (bb.x + bb.width / 2) * k - box.clientWidth / 2;
+    box.scrollTop = (bb.y + bb.height / 2) * k - box.clientHeight / 2;
+  }
+
+  function answerMap(abbr) {
+    if (mapAnswered) return;
+    const target = stateByAbbr(mapList[mapIdx]);
+    const picked = stateByAbbr(abbr);
+    if (!target || !picked) return;
+    mapAnswered = true;
+    const ok = abbr === target.abbr;
+    if (ok) mapScore++; else mapMissed.push(target.abbr);
+    playSFX(ok ? "correct" : "wrong");
+
+    $$('#screen-map [data-abbr="' + target.abbr + '"]').forEach(function (el) { el.classList.add(ok ? "correct" : "reveal"); });
+    if (!ok) {
+      $$('#screen-map [data-abbr="' + abbr + '"]').forEach(function (el) { el.classList.add("wrong"); });
+      ringMapRegion(target.abbr);
+      focusMapRegion(target.abbr);
+    }
+    $("#mapScore").textContent = "🎯 " + mapScore;
+
+    const last = mapIdx >= mapList.length - 1;
+    const fb = $("#mapFeedback");
+    fb.innerHTML =
+      '<p class="map-feedback-title">' + (ok ? "✅ Yes! That's " + target.state + "." : "🤔 That was " + picked.state + ". " + target.state + " is highlighted.") + "</p>" +
+      '<div class="fact"><span class="fact-label">🏛️ Capital</span>' + target.capital + "</div>" +
+      '<div class="fact"><span class="fact-label">🗺️ Where it is</span>' + whereText(target.abbr) + "</div>" +
+      '<button class="btn btn-primary btn-block" id="mapNext" disabled>' + (last ? "See results →" : "Next →") + "</button>";
+    fb.classList.remove("hidden");
+    on("#mapNext", "click", function () {
+      const b = $("#mapNext");
+      if (!b || b.disabled) return;
+      b.disabled = true;     // a second tap does nothing
+      if (last) finishMap(); else { mapIdx++; renderMapQuestion(); }
+    });
+    // Next stays off for a moment so a double-tap can't skip the answer.
+    gameLater(function () { const b = $("#mapNext"); if (b) b.disabled = false; }, 400);
+    fb.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  function finishMap() {
+    playSFX("completed");
+    logActivity("map", { states: mapList.slice(), score: mapScore, total: mapList.length });
+    show("results");
+    const total = mapList.length;
+    const pct = total ? mapScore / total : 0;
+    const wrap = $("#resultWrap");
+    const missed = mapMissed.map(function (a) { return stateByAbbr(a).state; });
+    wrap.innerHTML =
+      '<div class="result-emoji">' + (pct === 1 ? "🏆" : pct >= 0.5 ? "🌟" : "💪") + "</div>" +
+      "<h2>" + (pct === 1 ? "You found them all!" : pct >= 0.5 ? "Nice map skills!" : "Good try — keep exploring!") + "</h2>" +
+      '<div class="result-score">' + mapScore + " / " + total + "</div>" +
+      (missed.length ? '<p class="muted">Still learning: ' + missed.join(", ") + "</p>" : "") +
+      '<div style="margin-top:16px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">' +
+        '<button class="btn btn-accent btn-lg" id="mapAgain">Play again 🔁</button>' +
+        '<button class="btn btn-lg" id="mapHome">Home 🏠</button>' +
+      "</div>";
+    animIn(wrap);
+    if (pct === 1 && hasGSAP) launchConfetti();
+    on("#mapAgain", "click", function () { startMap(mapList); });
+    on("#mapHome", "click", function () { show("home"); renderHome(); });
+  }
+
+  // One click handler for the whole screen: a tapped state or territory tile.
+  on("#screen-map", "click", function (e) {
+    const el = e.target.closest ? e.target.closest("[data-abbr]") : null;
+    if (el) { answerMap(el.getAttribute("data-abbr")); return; }
+    if (e.target.classList && e.target.classList.contains("map-dc") && !mapAnswered) {
+      toast("That's Washington, D.C. — not one of the places in this game.");
+    }
+  });
+  on("#mapZoomIn", "click", function () { setMapZoom(mapZoomIdx + 1); });
+  on("#mapZoomOut", "click", function () { setMapZoom(mapZoomIdx - 1); });
+  on("#exitMap", "click", function () {
+    confirmExit(function () {
+      logActivity("map", { states: mapList.slice(), score: mapScore, total: mapList.length, exited: true });
+      show("home"); renderHome();
+    });
+  });
+
   // ---- Buying + opening packs -------------------------------
   function buyPack(pack) {
     if (save.coins < pack.cost) { toast("Not enough coins yet — do a lesson or quiz! 🪙"); return; }
@@ -1858,6 +2052,7 @@
     { sel: "#goLearn",     title: "📚 Learn Mode", text: "Tap here to study flash cards. Great for your first time with a state!", arrow: "👆", side: "top" },
     { sel: "#goQuiz",      title: "🎯 Quiz Mode", text: "Ready to test yourself? Play a fun game and earn coins! Get every answer right in a round of 5 or more for a 🏆 bonus.", arrow: "👆", side: "top" },
     { sel: "#goTest",      title: "📝 Test Mode", text: "The real challenge! Every question mixes multiple-choice and typing. Pick any states or territories, or everything. You get a letter grade at the end!", arrow: "👆", side: "top" },
+    { sel: "#goMap",       title: "🗺️ Map Pointing", text: "We name a state or territory and you tap where it is on the map. Pick which places to practice, and zoom in for the small ones!", arrow: "👆", side: "top" },
     { sel: "#goGames",     title: "🎮 Mini Games", text: "Memory Match and Speed Round pay a few bonus coins. You can earn up to 15 a day, so come back often!", arrow: "👆", side: "top" },
     { sel: "#shopPanel",   title: "🏪 Pack Shop", text: "Spend the coins you earn on animal packs. Each pack is a surprise — some animals are super rare! 🎁", arrow: "👇", side: "bottom" },
     { sel: "#zooPanel",    title: "🐾 My Collection", text: "Every animal you find from packs lives here. You can get doubles — try to collect them all! 🐶🦄", arrow: "👇", side: "bottom" },
@@ -2386,6 +2581,8 @@
   on("#goQuiz", "keydown", function (e) { if (e.key === "Enter") openPicker("quiz"); });
   on("#goTest", "click", function () { openPicker("test"); });
   on("#goTest", "keydown", function (e) { if (e.key === "Enter") openPicker("test"); });
+  on("#goMap", "click", function () { openPicker("map"); });
+  on("#goMap", "keydown", function (e) { if (e.key === "Enter") openPicker("map"); });
   on("#goGames", "click", openGames);
   on("#goGames", "keydown", function (e) { if (e.key === "Enter") openGames(); });
 

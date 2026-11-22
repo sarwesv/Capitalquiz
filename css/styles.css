@@ -281,8 +281,9 @@ body.flat .btn:active { box-shadow: var(--elev-2); }
 #goQuiz  { background: linear-gradient(145deg, #43d99a, var(--accent-2)); }
 #goTest  { background: linear-gradient(145deg, #b988ff, #8b5cf6); }
 #goGames { background: linear-gradient(145deg, #ffb35c, #f97316); }
-#goLearn h2, #goQuiz h2, #goTest h2, #goGames h2 { color: #fff; }
-#goLearn p, #goQuiz p, #goTest p, #goGames p { color: rgba(255, 255, 255, 0.92); }
+#goMap   { background: linear-gradient(145deg, #4fd1c5, #0f9b8e); }
+#goLearn h2, #goQuiz h2, #goTest h2, #goGames h2, #goMap h2 { color: #fff; }
+#goLearn p, #goQuiz p, #goTest p, #goGames p, #goMap p { color: rgba(255, 255, 255, 0.92); }
 
 /* ---- Progress panel + chart --------------------------------- */
 .panel { padding: 20px; margin-bottom: 18px; }
@@ -542,6 +543,41 @@ textarea.field { resize: vertical; min-height: 110px; }
 .feedback-status.ok { color: var(--md-secondary); }
 .link-btn { background: none; border: none; padding: 0; font: inherit; font-weight: 700; color: var(--md-primary); cursor: pointer; text-decoration: underline; }
 .credit-link { margin-top: 10px; }
+
+/* ---- Map pointing -------------------------------------------- */
+.map-tools { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 4px 0 8px; font-size: 0.85rem; }
+.map-zoom { display: inline-flex; align-items: center; gap: 8px; }
+.map-zoom .btn { padding: 6px 14px; font-size: 1.2rem; line-height: 1; min-width: 44px; }
+.map-zoom-label { font-weight: 800; min-width: 2.4em; text-align: center; }
+.map-scroll { overflow: auto; max-height: 62vh; padding: 6px; -webkit-overflow-scrolling: touch; }
+#mapStage { width: 100%; }
+#mapSvg { display: block; max-width: none; height: auto; }
+.map-region {
+  fill: #cfd8f7; fill: color-mix(in srgb, var(--md-primary) 22%, var(--md-surface));
+  stroke: var(--md-surface); stroke-width: 1; stroke-linejoin: round; cursor: pointer; transition: fill 0.15s;
+}
+.map-region:hover { fill: color-mix(in srgb, var(--md-primary) 45%, var(--md-surface)); }
+.map-dc { fill: var(--md-outline-variant); stroke: var(--md-surface); stroke-width: 1; }
+.map-region.correct, .terr-tile.correct { fill: var(--md-secondary); background: var(--md-secondary); }
+.map-region.wrong, .terr-tile.wrong { fill: var(--md-tertiary); background: var(--md-tertiary); }
+.map-region.reveal, .terr-tile.reveal { fill: var(--md-secondary); background: var(--md-secondary); stroke: var(--text); stroke-width: 2.5; outline: 3px solid var(--md-secondary); }
+.map-ring { fill: none; stroke: var(--md-secondary); stroke-width: 4; pointer-events: none; animation: mapRingPulse 1s ease-in-out infinite; }
+@keyframes mapRingPulse { 50% { stroke-width: 7; opacity: 0.6; } }
+@media (prefers-reduced-motion: reduce) { .map-ring { animation: none; } }
+.map-territories { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px 22px; margin: 12px 0 4px; }
+.terr-group { text-align: center; }
+.terr-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-soft); margin-bottom: 6px; }
+.terr-row { display: flex; gap: 8px; justify-content: center; }
+.terr-tile {
+  width: 92px; height: 62px; padding: 4px; border-radius: var(--radius); cursor: pointer;
+  background: var(--md-surface-container); border: 1px solid var(--md-outline-variant);
+}
+.terr-tile svg { width: 100%; height: 100%; display: block; }
+.terr-tile path { fill: #9fb4f2; fill: color-mix(in srgb, var(--md-primary) 55%, var(--md-surface)); stroke: color-mix(in srgb, var(--md-primary) 55%, var(--md-surface)); stroke-width: 2; stroke-linejoin: round; }
+.terr-tile:hover { border-color: var(--md-primary); }
+.terr-tile.correct path, .terr-tile.reveal path { fill: #fff; stroke: #fff; }
+.terr-tile.wrong path { fill: #fff; stroke: #fff; }
+.map-feedback-title { margin: 0; font-weight: 800; }
 
 /* ---- Test grade ---------------------------------------------- */
 .grade-card {
