@@ -17,6 +17,7 @@ function defaultSave() {
     progress: {},
     coins: 0,                  // spendable currency earned from lessons/quizzes.
     miniGame: { day: "", coins: 0 }, // coins earned from mini games on `day` (YYYY-MM-DD, local) — capped per day.
+    resetAt: 0,                // ms timestamp of the last "Reset everything" — lets other devices/cloud copies know to drop older progress.
     modifiedAt: 0,             // ms timestamp of the last change; the cloud merge uses it to pick the newer coins/collection.
     collection: {},            // { animalId: count } — duplicates allowed!
     quizHistory: [],           // [{ date, score, total }] for the chart.
@@ -71,6 +72,7 @@ function loadSave() {
 // Write the whole save back to disk (and trigger cloud sync if authenticated).
 // `opts.keepStamp` saves without touching modifiedAt (used when we are only
 // storing the result of a cloud merge, not a change the player made).
+// `opts.replace` overwrites the cloud copy instead of merging into it (a reset).
 function persist(save, opts) {
   if (!(opts && opts.keepStamp)) save.modifiedAt = Date.now();
   try {
@@ -84,7 +86,7 @@ function persist(save, opts) {
   if (window.FirebaseService && typeof window.FirebaseService.getCurrentUser === "function") {
     const user = window.FirebaseService.getCurrentUser();
     if (user && user.uid) {
-      window.FirebaseService.saveCloudSave(user.uid, save);
+      window.FirebaseService.saveCloudSave(user.uid, save, { replace: !!(opts && opts.replace) });
     }
   }
 }

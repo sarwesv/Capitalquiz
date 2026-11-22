@@ -157,15 +157,16 @@ export async function fetchCloudSave(uid) {
   }
 }
 
-export async function saveCloudSave(uid, data) {
+export async function saveCloudSave(uid, data, opts) {
   if (!db || !uid) return;
   try {
     setSyncStatus("syncing", "Saving to cloud...");
     const ref = doc(db, "users", uid);
-    await setDoc(ref, {
-      ...data,
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
+    const payload = { ...data, updatedAt: new Date().toISOString() };
+    // A normal save merges into the cloud doc; a reset must replace it, or the
+    // old progress/collection entries would stay behind in the cloud.
+    if (opts && opts.replace) await setDoc(ref, payload);
+    else await setDoc(ref, payload, { merge: true });
     setSyncStatus("synced", "Synced to cloud");
   } catch (err) {
     console.error("Error saving cloud save:", err);
@@ -202,7 +203,16 @@ export function mergeSaves(localSave, cloudSave) {
   if (!cloudSave) return { ...localSave };
   if (!localSave) return { ...cloudSave };
 
+  // "Reset everything" on one device must win over older copies elsewhere,
+  // otherwise merging would hand the old progress straight back. A copy that
+  // was reset more recently than the other one was last changed replaces it.
+  const localReset = localSave.resetAt || 0;
+  const cloudReset = cloudSave.resetAt || 0;
+  if (cloudReset > localReset && cloudReset > savedAtMs(localSave)) return { ...cloudSave };
+  if (localReset > cloudReset && localReset > savedAtMs(cloudSave)) return { ...localSave };
+
   const merged = { ...cloudSave, ...localSave };
+  merged.resetAt = Math.max(localReset, cloudReset);
   merged.modifiedAt = Math.max(savedAtMs(localSave), savedAtMs(cloudSave));
   merged.bestStreak = Math.max(localSave.bestStreak || 0, cloudSave.bestStreak || 0);
 

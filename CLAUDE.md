@@ -116,6 +116,10 @@ Per-state progress only grows, so it is combined (max / OR) and the one-time rew
 *and down*, so they are taken from whichever copy has the newer `modifiedAt` (stamped by
 `persist`) — never "keep the bigger number", which hands back spent coins and sold animals.
 Pass `{ keepStamp: true }` to `persist` when saving a merge result rather than a player change.
+**Reset:** "Reset everything" stamps `save.resetAt` and calls `persist(save, { replace: true })`, which
+*replaces* the cloud doc (a normal save merges, which would leave the old progress/collection keys
+behind). `mergeSaves` lets a reset beat any copy that hasn't changed since — otherwise the old
+progress comes straight back from the cloud or another device.
 
 **Typed answers** go through `checkTypedAnswer` (`data.js`): case, spacing, punctuation and
 "St."/"Saint" are ignored and small typos are accepted, but an exact match for a *different*

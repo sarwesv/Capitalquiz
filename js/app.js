@@ -1811,6 +1811,10 @@
       onConfirm: () => {
         clearSave();
         save = loadSave();
+        // Stamp the reset and overwrite the cloud copy too, or the old progress
+        // would come straight back from the cloud.
+        save.resetAt = Date.now();
+        persist(save, { replace: true });
         applyTheme(save.theme || "auto");
         applyAnswerLayout(save.answerLayout || "grid");
         renderHome();
