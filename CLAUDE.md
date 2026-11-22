@@ -116,6 +116,11 @@ Per-state progress only grows, so it is combined (max / OR) and the one-time rew
 *and down*, so they are taken from whichever copy has the newer `modifiedAt` (stamped by
 `persist`) — never "keep the bigger number", which hands back spent coins and sold animals.
 Pass `{ keepStamp: true }` to `persist` when saving a merge result rather than a player change.
+**One account per device save:** `save.cloudUid` records which Google account this device's progress belongs
+to. `persist` only uploads when it matches the signed-in user, and signing in as a *different* account
+swaps in that account's own save instead of merging the previous account's coins/animals into it. A
+failed cloud read (`fetchCloudSave` returns `undefined`; `null` means "no save yet") changes and uploads
+nothing. The snapshot listener ignores snapshots while the device still holds another account's data.
 **Reset:** "Reset everything" stamps `save.resetAt` and calls `persist(save, { replace: true })`, which
 *replaces* the cloud doc (a normal save merges, which would leave the old progress/collection keys
 behind). `mergeSaves` lets a reset beat any copy that hasn't changed since — otherwise the old

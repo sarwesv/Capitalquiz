@@ -17,6 +17,7 @@ function defaultSave() {
     progress: {},
     coins: 0,                  // spendable currency earned from lessons/quizzes.
     miniGame: { day: "", coins: 0 }, // coins earned from mini games on `day` (YYYY-MM-DD, local) — capped per day.
+    cloudUid: null,            // the account whose progress this device holds (so two accounts never get mixed).
     resetAt: 0,                // ms timestamp of the last "Reset everything" — lets other devices/cloud copies know to drop older progress.
     modifiedAt: 0,             // ms timestamp of the last change; the cloud merge uses it to pick the newer coins/collection.
     collection: {},            // { animalId: count } — duplicates allowed!
@@ -85,7 +86,8 @@ function persist(save, opts) {
   // Trigger cloud sync if user is authenticated with Firebase
   if (window.FirebaseService && typeof window.FirebaseService.getCurrentUser === "function") {
     const user = window.FirebaseService.getCurrentUser();
-    if (user && user.uid) {
+    // Only sync into the account this device's data belongs to.
+    if (user && user.uid && (!save.cloudUid || save.cloudUid === user.uid)) {
       window.FirebaseService.saveCloudSave(user.uid, save, { replace: !!(opts && opts.replace) });
     }
   }

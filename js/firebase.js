@@ -140,7 +140,7 @@ export async function signOutUser() {
 }
 
 export async function fetchCloudSave(uid) {
-  if (!db || !uid) return null;
+  if (!db || !uid) return undefined;   // not ready: "could not read", not "no save yet"
   try {
     setSyncStatus("syncing", "Fetching cloud data...");
     const ref = doc(db, "users", uid);
@@ -153,7 +153,7 @@ export async function fetchCloudSave(uid) {
   } catch (err) {
     console.error("Error fetching cloud save:", err);
     setSyncStatus("error", err.message);
-    return null;
+    return undefined;   // could not read (null means "this account has no save yet")
   }
 }
 

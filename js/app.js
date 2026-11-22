@@ -109,9 +109,8 @@
   function startTimer(elId, offsetMs) {
     sessionStart = Date.now() - (offsetMs || 0);
     sessionLogged = false;
+    stopTimer();          // clears timerElId, so set it afterwards (the tab-switch resume needs it).
     timerElId = elId;
-    hiddenAt = 0;
-    stopTimer();
     function tick() {
       var el = $(elId);
       if (el) el.textContent = "⏱️ " + clockText(Date.now() - sessionStart);
@@ -373,6 +372,8 @@
     });
   }
 
+  const RARITY_PLURAL = { common: "Commons", uncommon: "Uncommons", rare: "Rares", epic: "Epics", legendary: "Legendaries" };
+
   // How the collection is grouped: "pack" (default) or "rarity".
   let collectionGroupBy = "pack";
 
@@ -389,7 +390,7 @@
     if (collectionGroupBy === "rarity") {
       // Rarest first, so "Legendaries" sits at the top.
       sections = RARITY_ORDER.slice().reverse().map((rk) => ({
-        label: RARITIES[rk].name + (rk === "legendary" ? " ✨" : "") + "s",
+        label: RARITY_PLURAL[rk] + (rk === "legendary" ? " ✨" : ""),
         color: RARITIES[rk].color,
         animals: [].concat.apply([], PACKS.map((p) => p.pool)).filter((a) => a.rarity === rk),
       }));
@@ -715,7 +716,12 @@
   }
 
   on("#flashCard", "click", flipCard);
-  on("#flashCard", "keydown", (e) => { if (e.key === "Enter" || e.key === " ") flipCard(); });
+  on("#flashCard", "keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();   // Space would also scroll the page.
+      flipCard();
+    }
+  });
 
   on("#learnNext", "click", () => {
     if (learnIdx < learnList.length - 1) {
@@ -1510,6 +1516,7 @@
     const animal = rollFromPack(pack);
     const newCount = addAnimal(save, animal.id);
     persist(save);
+    renderHome();   // coins/collection are right straight away, however the pack screen is closed.
     openPackAnimation(pack, animal, newCount);
   }
 
@@ -1814,6 +1821,8 @@
         // Stamp the reset and overwrite the cloud copy too, or the old progress
         // would come straight back from the cloud.
         save.resetAt = Date.now();
+        const who = window.FirebaseService && window.FirebaseService.getCurrentUser();
+        if (who) save.cloudUid = who.uid;
         persist(save, { replace: true });
         applyTheme(save.theme || "auto");
         applyAnswerLayout(save.answerLayout || "grid");
@@ -1831,7 +1840,16 @@
   }
   function closeOverlay(sel) { $(sel).classList.add("hidden"); }
   // Click on the dark backdrop closes a modal.
-  $$(".overlay").forEach((o) => o.addEventListener("click", (e) => { if (e.target === o) o.classList.add("hidden"); }));
+  $$(".overlay").forEach((o) => o.addEventListener("click", (e) => {
+    if (e.target !== o) return;
+    if (o.id === "packOverlay") {
+      // The pack is already bought: don't let a stray tap skip its reveal, and
+      // refresh the home screen (coins, collection) when it is dismissed.
+      if (!$("#packDone")) return;
+      renderHome();
+    }
+    o.classList.add("hidden");
+  }));
 
   // ============================================================
   // TUTORIAL — one-time arrow coach marks
@@ -1855,7 +1873,8 @@
   const SCROLL_KEYS = ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " ", "Spacebar"];
   function preventScroll(e) { e.preventDefault(); }
   function preventScrollKeys(e) {
-    if (SCROLL_KEYS.indexOf(e.key) !== -1 && e.target.tagName !== "INPUT") e.preventDefault();
+    // Leave buttons and fields alone, so Space still presses Next/Skip.
+    if (SCROLL_KEYS.indexOf(e.key) !== -1 && ["INPUT", "TEXTAREA", "SELECT", "BUTTON"].indexOf(e.target.tagName) === -1) e.preventDefault();
   }
   function lockScroll() {
     window.addEventListener("wheel", preventScroll, { passive: false });
@@ -2303,7 +2322,12 @@
 
     window.addEventListener("firebaseCloudSaveReceived", (e) => {
       if (e.detail && window.FirebaseService) {
+        const user = window.FirebaseService.getCurrentUser();
+        // This device still holds another account's data: wait for the sign-in
+        // step to swap it for this account's, never merge the two together.
+        if (user && save.cloudUid && save.cloudUid !== user.uid) return;
         const merged = window.FirebaseService.mergeSaves(save, e.detail);
+        if (user) merged.cloudUid = user.uid;
         // Nothing new from the cloud — leave the live save alone.
         if (saveContent(merged) === saveContent(save)) return;
         save = merged;
@@ -2318,7 +2342,18 @@
           updateUserAuthUI(user);
           if (user) {
             const cloudSave = await window.FirebaseService.fetchCloudSave(user.uid);
-            save = window.FirebaseService.mergeSaves(save, cloudSave);
+            // Couldn't read the cloud (offline/error): change nothing, write nothing.
+            if (cloudSave === undefined) return;
+            if (save.cloudUid && save.cloudUid !== user.uid) {
+              // This device holds a DIFFERENT account's progress (shared device).
+              // Don't mix it into this account: show this account's own save.
+              save = Object.assign(defaultSave(), cloudSave || {});
+              applyTheme(save.theme || "auto");
+              applyAnswerLayout(save.answerLayout || "grid");
+            } else {
+              save = window.FirebaseService.mergeSaves(save, cloudSave);
+            }
+            save.cloudUid = user.uid;
             persist(save, { keepStamp: true });
             renderHome();
           }
